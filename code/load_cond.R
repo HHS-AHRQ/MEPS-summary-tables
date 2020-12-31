@@ -6,17 +6,18 @@
 
 # Merge condition cdes
   
-ccs_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
+ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
 ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
 
 
-  if(year < 2018) {
+  if(year < 2016) {
     condition_codes <- read_csv(ccs_url) %>%
-      setNames(c("CCS", "CCS_desc", "Condition"))
+      setNames(c("CCS", "CCS_desc", "Condition")) %>%
+      mutate(CCS = as.numeric(CCS))
     
-    cond <- cond_puf %>% mutate(CCS = CCCODEX) %>%
-      mutate(CCS_Codes = as.numeric(as.character(CCS))) %>%
-      left_join(condition_codes, by = "CCS_Codes")
+    cond <- cond_puf %>% 
+      mutate(CCS = as.numeric(as.character(CCCODEX))) %>%
+      left_join(condition_codes, by = "CCS")
     
   } else {
     

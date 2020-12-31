@@ -1,24 +1,20 @@
-# Create directory and define subgroups, stats --------------------------------
+# Create directories ----------------------------------------------------------
 
-#appKey <- 'hc_cond'
-appKey <- "hc_cond_icd10"
+dir.create("data_tables/hc_cond_icd9")
+dir.create("data_tables/hc_cond_icd10")
 
-tbl_dir <- sprintf("data_tables/%s", appKey)
-dir.create(tbl_dir)
-
-row_grps <- rowGrps_R[[appKey]]
-col_grps <- colGrps_R[[appKey]]
-demo_grps <- col_grps %>% pop("event", "sop")
-
+# Define groups ---------------------------------------------------------------
+col_grps <- demo_grps %>% add_v2X
 
 # Run for specified year(s) ---------------------------------------------------
-
-for(year in year_list[year_list >= 2018]) {
+for(year in year_list) {
+  
+  if(year < 2016)  tbl_dir <- "data_tables/hc_cond_icd9" 
+  if(year >= 2016) tbl_dir <- "data_tables/hc_cond_icd10" 
   
   dir.create(sprintf('%s/%s', tbl_dir, year))
   
   yr <- substring(year, 3, 4)
-  
   
 # Load files, merge, create subgroups, and svydesigns -------------------------
   
@@ -34,7 +30,7 @@ for(year in year_list[year_list >= 2018]) {
   
 # Loop over col_grps (demographic vars) ---------------------------------------
   
-  for(col in demo_grps) { print(col)
+  for(col in col_grps) { print(col)
     by_form <- as.formula(sprintf("~Condition + %s", col))
     
     res <- list()
@@ -54,7 +50,7 @@ for(year in year_list[year_list >= 2018]) {
         update.csv(file = sprintf("%s/%s.csv", year, stat), dir = tbl_dir)
     }
     
-  } # END for col in demo_grps
+  } # END for col in col_grps
   
   
 # By event type (design is different) -----------------------------------------

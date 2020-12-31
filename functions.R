@@ -1,127 +1,106 @@
 
+# Helper functions ------------------------------------------------------------
 pop <- function(vec, ...) vec[!vec %in% unlist(list(...))]
+
+p <- paste0
 
 add_v2X <- function(names) names %>% append(c('agegrps_v2X', 'insurance_v2X'))
 add_v3X <- function(names) names %>% append(c('agegrps_v2X', 'agegrps_v3X'))
 
-formatNum <- function(x, d) {
-  xnum = x[!is.na(x)]
-  dnum = d[!is.na(x)]
+is.odd <- function(x) { x %% 2 == 1 }
 
-  spf <- paste0("%.",dnum,"f")
-  fm_digits <- sprintf(spf, xnum)
-  new_x <- prettyNum(fm_digits, big.mark = ",", preserve.width = "none")
 
-  x[!is.na(x)] <- new_x
-  return(x)
+# Run functions ---------------------------------------------------------------
+
+stdize <- function(df, row, stat) {
+  
+  # Convert from wide to long
+  dfX <- df %>%
+    gather(key = colLevels, value = stat, -row) %>%
+    filter(!grepl("FALSE", colLevels)) %>%
+    mutate(colLevels = gsub(" > 0TRUE","",colLevels))
+  
+  # Split coefs and ses, then re-join
+  coefs <- dfX %>% filter(!grepl("se.",colLevels, fixed = T))
+  ses <- dfX %>% filter(grepl("se.", colLevels, fixed = T)) %>%
+    mutate(colLevels = gsub("se.","",colLevels, fixed = T)) %>%
+    rename(se = stat)
+  
+  out <- full_join(coefs, ses)
+  
+  out %>% setNames(c("rowLevels", "colLevels", stat, paste0(stat, "_se")))
 }
 
-findKey <- function(nm, keys) {
-  keys = as.character(keys)
-  str = keys[sapply(keys, function(x) grepl(x, nm)) %>% which]
-  if(length(str) == 0) return(NA)
-  return(str)
+update.csv <- function(add, file, dir){
+  add <- add %>%
+    select(one_of("rowGrp", "colGrp", "rowLevels", "colLevels", colnames(.)))
+  
+  init = !(file %in% list.files(dir, recursive=T))
+  fileName <- sprintf("%s/%s", dir, file) %>% gsub("//","/",.)
+  write.table(add, file = fileName, append = (!init), sep = ",", 
+              col.names = init, row.names = F)
 }
 
+# Format functions ------------------------------------------------------------
 
-getItem <- function(list, keys) {
-  slist <- list
-  default_code <- NULL
-
-  for(i in 1:(length(keys)+1)) {
-
-    if("DEFAULT" %in% names(slist)){
-      default_code <- slist[["DEFAULT"]]
-    }
-
-    if(length(slist) == 1) {
-      return(slist)
-    } else if(keys[i] %in% names(slist)) {
-      slist <- slist[[keys[i]]]
-    }
+add_keys <- function(df, keys) {
+  row_keys <- keys %>% rename(rowGrp = var, rowLevels = level, row_key = label)
+  col_keys <- keys %>% rename(colGrp = var, colLevels = level, col_key = label)
+  
+  # Only adjust rowLevels/colLevels if they are already in data frame
+  if("rowLevels" %in% colnames(df)) {
+    df <- df %>%  
+      left_join(row_keys) %>%
+      mutate(rowLevels = ifelse(!is.na(row_key), row_key, rowLevels)) %>%
+      select(-row_key)
   }
-
-  return(default_code)
+  
+  if("colLevels" %in% colnames(df)) {
+    df <- df %>%  
+      left_join(col_keys) %>%
+      mutate(colLevels = ifelse(!is.na(col_key), col_key, colLevels)) %>%
+      select(-col_key)
+  }
+  
+  return(df)
 }
 
+add_totals <- function(df, var = 'row') {
+  
+  df[,"var"] = df[,paste0(var,"Grp")]
+  df[,"lev"] = df[,paste0(var,"Levels")]
+  
+  totals <- df %>% filter(var == "ind")
+  all_grps <- df$var %>% unique %>% pop('ind')
+  
+  totals_list <- list()
+  for(grp in all_grps %>% pop("sop")) {
+    label = ifelse(grp == "event", "Any event", "All persons")
+    totals_list[[grp]] <- totals %>% mutate(var = grp, lev = label)
+  }
+  all_totals <- bind_rows(totals_list)
+  all_totals[,paste0(var,"Grp")] = all_totals$var
+  all_totals[,paste0(var,"Levels")] = all_totals$lev
+  
+  out <- bind_rows(df, all_totals) %>% select(-var, -lev)
+  
+  # If 'Any event' is already calculated, remove the calculated version
+  distinct_names <- out %>% select(-value, -se, -sample_size) %>% colnames
+  distinct_out   <- out %>% distinct(across(all_of(distinct_names)), .keep_all = T)
 
+  return(distinct_out)
+}
 
 rm_v2 <- function(df){
-df%>% mutate(rowGrp = rowGrp %>% gsub("_v2X","",.) %>% gsub("_v3X","",.),
-             colGrp = colGrp %>% gsub("_v2X","",.) %>% gsub("_v3X","",.))
-}
-
-rm_na <- function(vec) {
-  vec[!is.na(vec)]
-}
-
-rm_spec <- function(str) gsub("[^[:alnum:]]","",str) %>% tolower
-
-readSource <- function(file,...,dir=".") {
-  fileName <- sprintf("%s/%s",dir,file) %>% gsub("//","/",.)
-  codeString <- readChar(fileName,file.info(fileName)$size)
-  codeString <- codeString %>% gsub("\r","",.) # %>% gsub("\n","<br>",.)
-  # codeString <- codeString %>% rsub(...) %>% gsub("\r","",.)
-  codeString
-}
-
-run <- function(codeString,verbose=T){
-  if(verbose) writeLines(codeString)
-  eval(parse(text=codeString),envir=.GlobalEnv)
-}
-
-sentence_case <- function(str) {
-  paste0(
-    substring(str,1,1) %>% toupper,
-    substring(str,2) %>% tolower
-  )
+  df %>% 
+    mutate(
+      rowGrp = rowGrp %>% gsub("_v2X","",.) %>% gsub("_v3X","",.),
+      colGrp = colGrp %>% gsub("_v2X","",.) %>% gsub("_v3X","",.))
 }
 
 switch_labels <- function(df){
   df %>%
-    mutate(g1=rowGrp,g2=colGrp,l1=rowLevels,l2=colLevels) %>%
-    mutate(rowGrp=g2,colGrp=g1,rowLevels=l2,colLevels=l1) %>%
-    select(-g1,-g2,-l1,-l2)
-}
-
-reverse <- function(df) df[nrow(df):1,]
-
-dedup <- function(df, rev = T){
-  chk_vars <- c("Year", "stat", "rowGrp", "colGrp", "rowLevels", "colLevels")
-  df_vars <- chk_vars[chk_vars %in% colnames(df)]
-  if(rev) {
-    out <- df %>%
-      reverse %>%
-      distinct_at(df_vars,.keep_all=TRUE) %>%
-      reverse
-  } else {
-    out <- df %>%
-      distinct_at(df_vars,.keep_all=TRUE)
-  }
-  return(out)
-}
-
-
-rsub <- function(string,...,type='r') {
-  repl = switch(type,
-                'r'='\\.%s\\.',
-                'sas'='&%s\\.')
-
-  sub_list = list(...) %>% unlist
-  for(l in names(sub_list)){
-    original <- sprintf(repl,l)
-    replacement <- sub_list[l]
-    string <- gsub(original,replacement,string)
-  }
-  return(string)
-}
-
-reorder_levels <- function(df,new_levels){
-  orig_l1 = unique(df$levels)
-  new_l1 = c(orig_l1[!orig_l1 %in% new_levels],new_levels)
-
-  df %>%
-    mutate(levels = factor(levels,levels=new_l1)) %>%
-    arrange(levels) %>%
-    mutate(levels = as.character(levels))
+    mutate(g1 = rowGrp, g2 = colGrp, l1 = rowLevels, l2 = colLevels) %>%
+    mutate(rowGrp = g2, colGrp = g1, rowLevels = l2, colLevels = l1) %>%
+    select(-g1, -g2, -l1, -l2)
 }

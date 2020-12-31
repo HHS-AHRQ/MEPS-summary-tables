@@ -1,16 +1,13 @@
-# Create directory and define subgroups, stats --------------------------------
+# Create directory ------------------------------------------------------------
 
-appKey <- 'hc_pmed'
-
-tbl_dir <- sprintf("data_tables/%s", appKey)
+tbl_dir <- "data_tables/hc_pmed"
 dir.create(tbl_dir)
 
-row_grps <- rowGrps_R[[appKey]]
-col_grps <- colGrps_R[[appKey]]
-
+# Define groups ---------------------------------------------------------------
+row_grps <- pmed_grps 
+col_grps <- "ind"
 
 # Run for specified year(s) ---------------------------------------------------
-
 for(year in year_list) {
   dir.create(sprintf('%s/%s', tbl_dir, year))
 

@@ -53,8 +53,8 @@ pers_events <- stacked_events %>%
     ungroup
   
   # Add filler 0's for people that have no events
-  events <- c("DVT", "RX",  "OBV", "OBD", "OBO", "OPT",
-              "OPY", "OPZ", "ERT", "IPT", "HHT")
+  events <- c("DVT", "RX",  "OBV", "OBD", "OBO", 
+              "OPT", "OPY", "OPZ", "ERT", "IPT", "HHT")
   
   filler <- expand.grid(DUPERSID = FYCsub$DUPERSID, event = events)
   

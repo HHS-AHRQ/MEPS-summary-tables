@@ -9,7 +9,7 @@ spX <- c("XPX", "SFX", "PRX", "MRX", "MDX", "OZX")
 
 print("by Event type...")
 
-for(row in demo_grps) { print(sprintf("  row = %s", row)) 
+for(row in row_grps) { print(sprintf("  row = %s", row)) 
   
   subdsgn <- subset(EVNTdsgn, XPX >= 0)
   
@@ -48,7 +48,7 @@ for(row in demo_grps) { print(sprintf("  row = %s", row))
 print("by SOP...")
 
 
-for(row in demo_grps) { print(sprintf("  row = %s", row)) 
+for(row in row_grps) { print(sprintf("  row = %s", row)) 
   by_form  <- as.formula(sprintf("~%s", row))
   
   for(sp in spX) {
@@ -109,7 +109,7 @@ outname <- sprintf("%s/%s.csv", year, stat)
 
 print("By event type...")
 
-for(row in demo_grps) {
+for(row in row_grps) {
   by_form  <- as.formula(sprintf("~%s + event", row))
   res <- svyby(~ANY, by = by_form, FUN = svymean, design = EVdsgn)
   res %>% 
@@ -122,7 +122,7 @@ for(row in demo_grps) {
 
 print("by SOP...")
 
-for(row in demo_grps) {
+for(row in row_grps) {
   by_form  <- as.formula(sprintf("~%s", row))
   res <- svyby(~EXP + SLF + MCR + MCD + PTR + OTZ, FUN = svymean, by = by_form, design = nEVTdsgn)
   res %>%

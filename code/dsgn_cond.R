@@ -3,7 +3,7 @@
     group_by(DUPERSID, Condition, count) %>%
     mutate_at(vars(SFX, PRX, MRX, MDX, OZX, XPX), sum) %>% 
     select(
-      one_of(demo_grps), 
+      one_of(col_grps), 
       SFX, PRX, MRX, MDX, OZX, XPX,
       ind, count, VARSTR, VARPSU, PERWTF) %>%
     ungroup %>% distinct

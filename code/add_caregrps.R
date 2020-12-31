@@ -1,4 +1,12 @@
 
+# Edit column names for 'year before' and 'year after' vars
+yb <- substring(year - 1, 3, 4)
+ya <- substring(year + 1, 3, 4)
+
+colnames(FYC) <- colnames(FYC) %>% gsub(ya, "ya", .)
+colnames(FYC) <- colnames(FYC) %>% gsub(yb, "yb", .)
+
+
 # Access to care --------------------------------------------------------------
 
 ## Usual source of care
@@ -16,32 +24,28 @@ FYC <- FYC %>%
 
 ## Difficulty receiving needed care
 
-MDP <- c("MD", "DN", "PM")
+## For 2002-2017, difficulty receiving needed care and reasons for difficulty
+if(year <= 2017) {
 
-difficulty_vars <- c(
-  paste0(MDP, "UNAB42"),
-  paste0(MDP, "DLAY42"),
-  paste0(MDP, "DLRS42"),
-  paste0(MDP, "UNRS42"))
-
-
-if(all(difficulty_vars %in% colnames(FYC))) {
-
-  ## Reason for difficulty receiving needed care
   FYC <- FYC %>%
     mutate(
+      # any delay / unable
       delay_MD  = (MDUNAB42 == 1 | MDDLAY42==1)*1,
       delay_DN  = (DNUNAB42 == 1 | DNDLAY42==1)*1,
       delay_PM  = (PMUNAB42 == 1 | PMDLAY42==1)*1,
 
+      # Among people unable or delayed, how many...
+      # ...couldn't afford
       afford_MD = (MDDLRS42 == 1 | MDUNRS42 == 1)*1,
       afford_DN = (DNDLRS42 == 1 | DNUNRS42 == 1)*1,
       afford_PM = (PMDLRS42 == 1 | PMUNRS42 == 1)*1,
 
+      # ...insurance problems
       insure_MD = (MDDLRS42 %in% c(2,3) | MDUNRS42 %in% c(2,3))*1,
       insure_DN = (DNDLRS42 %in% c(2,3) | DNUNRS42 %in% c(2,3))*1,
       insure_PM = (PMDLRS42 %in% c(2,3) | PMUNRS42 %in% c(2,3))*1,
 
+      # ...other
       other_MD  = (MDDLRS42 > 3 | MDUNRS42 > 3)*1,
       other_DN  = (DNDLRS42 > 3 | DNUNRS42 > 3)*1,
       other_PM  = (PMDLRS42 > 3 | PMUNRS42 > 3)*1,
@@ -50,43 +54,62 @@ if(all(difficulty_vars %in% colnames(FYC))) {
       afford_ANY = (afford_MD | afford_DN | afford_PM)*1,
       insure_ANY = (insure_MD | insure_DN | insure_PM)*1,
       other_ANY  = (other_MD  | other_DN  | other_PM)*1)
+  
+} 
 
+# For 2018 and beyond, CAPI changes only ask about affordability of treatment
+
+if(year >= 2018) {
+  
+  FYC <- FYC %>%
+    mutate(
+      afford_MD = (AFRDCA42 == 1)*1,
+      afford_DN = (AFRDDN42 == 1)*1,
+      afford_PM = (AFRDPM42 == 1)*1,
+      
+      delay_MD = (DLAYCA42 == 1)*1,
+      delay_DN = (DLAYDN42 == 1)*1,
+      delay_PM = (DLAYPM42 == 1)*1,
+      
+      afford_ANY = (afford_MD | afford_DN | afford_PM)*1,
+      delay_ANY  = (delay_MD  | delay_DN  | delay_PM)*1)
 }
 
 
 
 # Preventive care -------------------------------------------------------------
+#
+# 12/22/2020: Not doing these anymore, because of 2018 re-design
 
 ## Adults advised to quit smoking
 
-if(year == 2002)
-  FYC <- FYC %>% rename(ADNSMK42 = ADDSMK42)
-
-if("ADNSMK42" %in% colnames(FYC)) {
-  FYC <- FYC %>%
-    mutate(
-      adult_nosmok = recode_factor(
-        ADNSMK42,
-        .default = "Missing",
-        .missing = "Missing",
-        "1" = "Told to quit",
-        "2" = "Not told to quit",
-        "3" = "Had no visits in the last 12 months",
-        "-9" = "Not ascertained",
-        "-15" = "Not ascertained",
-        "-1" = "Inapplicable"))
-}
-
-# Children receiving dental care
-
-FYC <- FYC %>%
-  mutate(
-    child_2to17 = (1 < AGELAST & AGELAST < 18),
-    child_dental = ((DVTOT > 0) & (child_2to17==1))*1,
-    child_dental = recode_factor(
-      child_dental, .default = "Missing", .missing = "Missing",
-      "1" = "One or more dental visits",
-      "0" = "No dental visits in past year"))
+# if(year == 2002)
+#   FYC <- FYC %>% rename(ADNSMK42 = ADDSMK42)
+# if("ADNSMK42" %in% colnames(FYC)) {
+#   FYC <- FYC %>%
+#     mutate(
+#       adult_nosmok = recode_factor(
+#         ADNSMK42,
+#         .default = "Missing",
+#         .missing = "Missing",
+#         "1" = "Told to quit",
+#         "2" = "Not told to quit",
+#         "3" = "Had no visits in the last 12 months",
+#         "-9" = "Not ascertained",
+#         "-15" = "Not ascertained",
+#         "-1" = "Inapplicable"))
+# }
+# 
+# # Children receiving dental care
+# 
+# FYC <- FYC %>%
+#   mutate(
+#     child_2to17 = (1 < AGELAST & AGELAST < 18),
+#     child_dental = ((DVTOT > 0) & (child_2to17==1))*1,
+#     child_dental = recode_factor(
+#       child_dental, .default = "Missing", .missing = "Missing",
+#       "1" = "One or more dental visits",
+#       "0" = "No dental visits in past year"))
 
 # Diabetes Care ---------------------------------------------------------------
 
@@ -99,13 +122,13 @@ FYC <- FYC %>%
     diab_a1c,
     .default = "Missing",
     .missing = "Missing",
-    "1" = "Had measurement",
-    "0" = "Did not have measurement",
-    "-7" = "Don't know/Non-response",
-    "-8" = "Don't know/Non-response",
-    "-9" = "Don't know/Non-response",
+    "1"   = "Had measurement",
+    "0"   = "Did not have measurement",
+    "-7"  = "Don't know/Non-response",
+    "-8"  = "Don't know/Non-response",
+    "-9"  = "Don't know/Non-response",
     "-15" = "Don't know/Non-response",
-    "-1" = "Inapplicable"))
+    "-1"  = "Inapplicable"))
 
 ## Diabetes care: Lipid profile
 
@@ -235,18 +258,10 @@ freq_levels <- c(
   "-15" = "Don't know/Non-response",
   "-1" = "Inapplicable")
 
-qual_vars_adults <- c(
-  "ADRTWW42", "ADILWW42", "ADLIST42", "ADEXPL42",
-  "ADRESP42", "ADPRTM42", "ADHECR42")
-
-qual_vars_child <- c(
-  "CHRTWW42", "CHILWW42", "CHLIST42", "CHEXPL42",
-  "CHRESP42", "CHPRTM42", "CHHECR42")
-
-# ADULTS ------------------------------------------------------------
-
-if(all(qual_vars_adults %in% colnames(FYC))) {
-
+if(year <= 2017 | is.odd(year)) {
+  
+  # ADULTS ------------------------------------------------------------
+  
   # Ability to schedule a routine appt. (adults)
   FYC <- FYC %>%
     mutate(adult_routine = recode_factor(
@@ -288,11 +303,9 @@ if(all(qual_vars_adults %in% colnames(FYC))) {
           .$ADHECR42 == -1 ~ "Inapplicable",
           .$ADHECR42 <= -7 ~ "Don\'t know/Non-response",
           TRUE ~ "Missing")))
-}
 
-# CHILDREN ----------------------------------------------------------
 
-if(all(qual_vars_child %in% colnames(FYC))) {
+  # CHILDREN ----------------------------------------------------------
 
   # Ability to schedule a routine appt. (children)
   FYC <- FYC %>%

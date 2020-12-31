@@ -76,11 +76,11 @@ for(app in apps) { cat("\n", app, "\n");
     by <- c("colGrp", "rowGrp", "colLevels", "rowLevels")
     by <- by[by %in% colnames(s.0)]
     
-    s.0 <- s.0 %>% rename_(coef.y0 = stat, se.y0 = se)
-    s.1 <- s.1 %>% rename_(coef.y1 = stat, se.y1 = se)
-    s.2 <- s.2 %>% rename_(coef.y2 = stat, se.y2 = se)
-    s.3 <- s.3 %>% rename_(coef.y3 = stat, se.y3 = se)
-    s.4 <- s.4 %>% rename_(coef.y4 = stat, se.y4 = se)
+    s.0 <- s.0 %>% rename(coef.y0 = stat, se.y0 = se)
+    s.1 <- s.1 %>% rename(coef.y1 = stat, se.y1 = se)
+    s.2 <- s.2 %>% rename(coef.y2 = stat, se.y2 = se)
+    s.3 <- s.3 %>% rename(coef.y3 = stat, se.y3 = se)
+    s.4 <- s.4 %>% rename(coef.y4 = stat, se.y4 = se)
     
     both <- s.0 %>% 
       full_join(s.1, by = by) %>% 

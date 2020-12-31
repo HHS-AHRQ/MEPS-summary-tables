@@ -24,7 +24,7 @@ exp_form <- as.formula(
   OBVEXP + OBDEXP + HHTEXP + OMAEXP +
   OPTEXP + OPYEXP")
 
-for(row in demo_grps) { print(sprintf("  row = %s", row)) 
+for(row in row_grps) { print(sprintf("  row = %s", row)) 
   by_form  <- as.formula(sprintf("~%s", row))
   
   res <- list()
@@ -62,7 +62,7 @@ pct_form <- as.formula(
 exp_form <- as.formula(
   "~TOTEXP + TOTSLF + TOTPTR + TOTMCR + TOTMCD + TOTOTZ")
 
-for(row in demo_grps) {print(sprintf("  row = %s", row)) 
+for(row in row_grps) {print(sprintf("  row = %s", row)) 
   by_form  <- as.formula(sprintf("~%s", row))
   
   res <- list()

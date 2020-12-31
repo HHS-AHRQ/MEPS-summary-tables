@@ -10,41 +10,34 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(tidyverse)
 library(survey)
 library(MEPS)
-library(haven)
+library(readxl)
 library(htmltools)
+#library(haven) -- included in tidyverse
 
 source("functions.R")
-source("dictionaries.R")
-source("functions_run.R")
 
-apps <- c("hc_use", "hc_care", "hc_ins", "hc_cond_icd9", "hc_cond_icd10", "hc_pmed") 
+apps <- c(
+  "hc_use", "hc_ins", "hc_pmed", 
+  "hc_care_access", "hc_care_diab", "hc_care_qual",
+  "hc_cond_icd9",   "hc_cond_icd10") 
 
 
 # Year (or years) that needs to be run
-  year_list <- c(2018, 2014)
+  #year_list <- c(2014, 2018)
+year_list = 2018
   hc_year <- max(year_list)
 
-# Set local directory for storing PUFs
-  mydir = "C:/MEPS"
   
+# Define grouping variables ---------------------------------------------------
+  
+  demo_grps <- c(
+    "ind", "agegrps", "region", "married", "race", "sex", "education",
+    "employed", "insurance", "poverty", "health", "mnhlth")
+  
+  pmed_grps <- c("TC1name", "RXDRGNAM")
+  
+  ins_grps  <- c("insurance", "ins_lt65", "ins_ge65")
 
-# Optional: rename existing folder to QC code on previous years ---------------    
-# # still working on this part...
-# for(year in year_list) { print(year)
-#   for(app in apps) {
-#     existing_folder = str_glue("data_tables/{app}/{year}")
-#     if(!existing_folder %in% 
-#        list.files(str_glue("data_tables/{app}"), full.names = T)) {
-#       next
-#     }
-#     folder_copy = str_glue("data_tables/{app}/{year} - orig")
-#     dir.create(folder_copy)
-#     files <- list.files(existing_folder, full.names = T)
-#     file.copy(from = files, to = folder_copy)
-#     unlink(existing_folder, recursive = T)
-#   }
-# }
-  
   
 # Create tables for new data year ---------------------------------------------
 
@@ -55,33 +48,40 @@ apps <- c("hc_use", "hc_care", "hc_ins", "hc_cond_icd9", "hc_cond_icd10", "hc_pm
  
   source("run_ins.R")  # ~ 4 min
   source("run_pmed.R") # ~ 2 min 
-  source("run_care.R") # ~ 21 min
-  source("run_cond.R") # ~ 20 min.
+  
+  source("run_care_access.R") # Shift in variables in 2018
+  source("run_care_diab.R")   
+  source("run_care_qual.R")   # Only odd years, starting 2017 (2002-2017, 2019, 2021,...)
+  
+  source("run_cond.R") # do NOT run for 2016/2017 -- only available on Secure LAN
   source("run_use.R")  # ~ 1 hr 
 
+  
   # QC tables for new year -- need to update for hc_cond_icd10 to include more years
     log_file <- "update_files/update_log.txt"
-    source("check_UPDATE.R")
+    source("UPDATE_check.R")
   
   ## STOP!! CHECK LOG (update_files/update_log.txt) before proceeding
   
   ## Transfer 2016/2017 hc_cond_icd10 tables here before formatting
     
   
-# Format tables and create HTML / JSON files ----------------------------------
-  
-  # Format tables to include in formatted_tables folder
+# Format tables --------------------------------------------------------------
+    
+  # Output to formatted_tables folder
   # totPOP for 'Any event' is updated -- old version was including all people, including those with no events
-    source("tables_format.R")  
+
+  source("functions_format.R")  
   
-  # Update MASTER datasets
-    source("../r/Update_master.R")
+  format_tables(appKey = "hc_ins",  years = 1996:2018)
+  format_tables(appKey = "hc_pmed", years = 1996:2018)
+  format_tables(appKey = "hc_use",  years = 1996:2018)
   
-  # Run RtoHTML to update web pages with new year
-    source("../r/RtoHTML.R", chdir = T)
+  format_tables(appKey = "hc_cond_icd9",  years = 1996:2015)
+  format_tables(appKey = "hc_cond_icd10", years = 2016:2018)
   
-  # Run RtoJSON to update JSON data with new year
-    write_data  = F
-    write_notes = TRUE
-    source("../r/RtoJSON.R", chdir = T)
+  format_tables(appKey = "hc_care_access", years = 2002:2018)
+  format_tables(appKey = "hc_care_diab",   years = 2002:2018)
+  format_tables(appKey = "hc_care_qual",   years = 2002:2017)
   
+    

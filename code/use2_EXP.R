@@ -8,7 +8,7 @@ events <- c("TOT", "DVT", "RX",  "OBV", "OBD",
 
 sops <- c("EXP", "SLF", "PTR", "MCR", "MCD", "OTZ")
 
-for(row in demo_grps) {
+for(row in row_grps) {
   by_form  <- as.formula(sprintf("~%s", row))
   
   for(ev in events) {
@@ -61,5 +61,5 @@ for(row in demo_grps) {
       
     } # END for sp in sops
   } # END for ev in events
-} # END for row in demo_grps
+} # END for row in row_grps
 

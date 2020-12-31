@@ -1,28 +1,15 @@
-# Create directory and define subgroups, stats --------------------------------
+# Create directory ------------------------------------------------------------
 
-appKey <- 'hc_use'
-
-tbl_dir <- sprintf("data_tables/%s", appKey)
+tbl_dir <- "data_tables/hc_use"
 dir.create(tbl_dir)
 
-row_grps <- rowGrps_R[[appKey]]
-col_grps <- colGrps_R[[appKey]]
-demo_grps <- c(row_grps, col_grps) %>% unique %>% 
-  pop("event", "event_v2X", "sop")
-
-
-
-
-# demo_grps <- c("ind", "sex") ### !!!! FOR TESTING PURPOSES ONLY !!!
-
-
-
-
+# Define groups ---------------------------------------------------------------
+row_grps <- demo_grps %>% add_v2X
+col_grps <- demo_grps %>% add_v2X
 
 # Run for specified year(s) ---------------------------------------------------
 
 for(year in year_list) {
-  
   dir.create(sprintf('%s/%s', tbl_dir, year))
   
   yr <- substring(year, 3, 4)
@@ -33,7 +20,8 @@ for(year in year_list) {
   source("code/add_subgrps.R", echo = T)  # Define subgroups
   
   FYCsub <- FYC %>%                       # Keep only needed vars from FYC for event merge
-    select(one_of(demo_grps), DUPERSID, VARSTR, VARPSU, PERWTF)
+    select(one_of(demo_grps), starts_with("agegrps"), starts_with("insurance"),
+           DUPERSID, VARSTR, VARPSU, PERWTF)
   
   source("code/load_use.R", echo = T)    # Load event files
   source("code/dsgn_use.R", echo = T)    # Define all survey design objects
@@ -41,11 +29,11 @@ for(year in year_list) {
 
 # Loop over row_grps and col_grps (demographic vars) --------------------------
   
-  for(row in demo_grps) { print(sprintf("row = %s", row))
+  for(row in row_grps) { print(sprintf("row = %s", row))
     
-    grp_number <- which(demo_grps == row)
-    remaining_grps <- demo_grps[-c(1:grp_number)]
-    if(row == "ind") remaining_grps <- demo_grps
+    grp_number <- which(row_grps == row)
+    remaining_grps <- row_grps[-c(1:grp_number)]
+    if(row == "ind") remaining_grps <- row_grps
     
     for(col in remaining_grps) { 
       
@@ -55,14 +43,14 @@ for(year in year_list) {
       if(row2 == col2 & row2 != 'ind') next
 
       print(sprintf("  col = %s", col))
-    
+      
       by_form <- as.formula(sprintf("~%s + %s", row, col))
       
       res <- list()
       res[["totPOP"]] <- svyby(~(PERWTF > 0), FUN = svytotal, by = by_form, design = FYCdsgn)
       res[["pctEXP"]] <- svyby(~(TOTEXP > 0), FUN = svymean,  by = by_form, design = FYCdsgn)
 
-       fyc_gt0 <- subset(FYCdsgn, TOTEXP > 0)
+      fyc_gt0 <- subset(FYCdsgn, TOTEXP > 0)
       res[["totEXP"]]   <- svyby(~TOTEXP, FUN = svytotal, by = by_form, design = FYCdsgn)
       res[["meanEXP0"]] <- svyby(~TOTEXP, FUN = svymean,  by = by_form, design = FYCdsgn)
       res[["meanEXP"]]  <- svyby(~TOTEXP, FUN = svymean,  by = by_form, design = fyc_gt0)
@@ -93,14 +81,14 @@ for(year in year_list) {
           update.csv(file = sprintf("%s/%s.csv", year, stat), dir = tbl_dir)
       }
       
-    } # END for col in demo_grps
-  } # END for row in demo_grps
+    } # END for col in remaining_grps
+  } # END for row in row_grps
   
   
 # By Event type, SOPs ---------------------------------------------------------  
 #
 #  Splitting up this next section by stat type, since certain stats
-#  require subsetting the svydesign object (and hence need loops)
+#   require subsetting the svydesign object (and hence need loops)
 
   source("code/use1_POP_EXP0.R", echo = T) # totPOP, pctEXP, totEXP, meanEXP0, n 
   source("code/use2_EXP.R", echo = T)      # meanEXP, medEXP, n_exp
