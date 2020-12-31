@@ -149,7 +149,10 @@ format_tables = function(appKey, years) {
     # For hc_care_qual, split 'adult' and 'child' into separate column --------
     if(appKey == "hc_care_qual") {
       fmt_totals <- fmt_totals %>%
-        separate(colGrp, into = c("adult_child", "colGrp"), sep = "_")
+        separate(colGrp, into = c("adult_child", "colGrp"), sep = "_") %>%
+        mutate(
+          adult_child = replace(adult_child, adult_child == "adult", "Adults"),
+          adult_child = replace(adult_child, adult_child == "child", "Children"))
     }
     
     # Add row/col labels and groups -------------------------------------------
@@ -201,10 +204,7 @@ format_tables = function(appKey, years) {
       # For 'hc_care_qual', replace '[adults/children]' placeholder with appropriate text
       if(appKey == "hc_care_qual") {
         fmt_captioned <- fmt_captioned %>%
-          mutate(
-            adult_child_text = ifelse(adult_child == "adult", "adults", "children"),
-            caption = caption %>% str_replace_all(fixed("[adults/children]"), adult_child_text)
-          ) 
+          mutate(caption = str_replace_all(caption, fixed("[adults/children]"), adult_child)) 
       }
           
 
@@ -222,7 +222,7 @@ format_tables = function(appKey, years) {
         ) 
     }
     
-    # Clean up
+    # Clean up caption
     fmt_captioned <- fmt_captioned %>%
       mutate(
         caption = caption %>% str_to_sentence %>%
@@ -235,10 +235,6 @@ format_tables = function(appKey, years) {
       )
     
 
-    # fmt_captioned %>%
-    #   #filter(stat_var == "totPOP") %>%
-    #   select(byGrps, caption) %>% distinct %>% print(n=100)
-
 
     # Final processing steps and output ---------------------------------------
     out_tbl <- fmt_captioned %>%
@@ -246,12 +242,11 @@ format_tables = function(appKey, years) {
       rename(row_var = rowGrp, col_var = colGrp) %>%
       
       select(one_of(
-        "Year",
-        "stat_group", "stat_var", "stat_label",
+        "Year", "stat_group", "stat_var", "stat_label",
         "row_group", "row_var", "row_label", "rowLevels",
         "col_group", "col_var", "col_label", "colLevels", 
-        "adult_child", "value", "se", "asterisk", "Percent", "sample_size",
-        "caption")) %>%
+        "adult_child", "value", "se", "asterisk", 
+        "Percent", "sample_size", "caption")) %>%
       
       mutate(
         stat_var = factor(stat_var, levels = stat_order),

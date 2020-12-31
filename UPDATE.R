@@ -24,7 +24,7 @@ apps <- c(
 
 # Year (or years) that needs to be run
   #year_list <- c(2014, 2018)
-year_list = 2018
+  year_list = 2018
   hc_year <- max(year_list)
 
   
