@@ -20,13 +20,18 @@ Each year, after the MEPS full-year-consolidated (FYC) file is released, the fol
 
 2. If needed, update the spreadsheets in the [dictionaries](dictionaries) folder with new labels.
 
-2. Follow the instructions in [UPDATE.R](build_hc_tables/UPDATE.R) to create tables for specified years. Run time takes approximately 3 hours to complete. Note that you may need to create local folders to store interim files from this process. These files are not 
+3. Follow the instructions in [UPDATE.R](UPDATE.R) to create tables for specified years. Run time takes approximately 3 hours to complete. Note that you may need to create local folders to store interim files from this process. These files are not 
 
 ## File Structure
 This repository contains the following components:
-* [code](code): R code snippets for loading MEPS data (`load_*.R`), adding subgroups (`add_*.R`), and defining the survey designs (`dsgn_*.R`). Additional codes for the Use and Expenditures tables are separated for convenience (`use*.R`)
+* [code](code): R code snippets for: 
+	* loading MEPS data (`load_*.R`)
+	* adding subgroups (`add_*.R`)  
+	* defining the survey design objects (`dsgn_*.R`). 
+	* additional codes for the Use and Expenditures tables that are separated for convenience (`use*.R`)
 * [dictionaries](dictionaries): Excel files containing labels, categories, and captions for certain variables
 * [formatted_tables](formatted_tables): The final version of the formatted data tables that are used in the MEPS-HC summary tables web page
+* [qc](qc): Code and files used to QC new tables, or edits to existing code
 
 * [functions.R](functions.R): Helper functions 
 * [functions_format.R](functions_format.R): Main function for formatting tables
@@ -39,11 +44,11 @@ This repository contains the following components:
 	* Prescribed medicines:  [run_pmed.R](run_pmed.R)
 	* Health care use, expenditures, and population characteristics:  [run_use.R](run_use.R)
 
-* [UPDATE.R](UPDATE.R): Main R code used to create and format tables
+* [UPDATE.R](UPDATE.R): Main R code used to create, format, and QC tables
 
 
 ## Archived version
-This version of the MEPS summary tables repository was edited to focus on creation and formatting of the summary data tables that underly the MEPS-HC sumary tables tool. A previous version of this repository also included HTML and JavaScript to display the tables on a web server. The previous version has been archived, as it is no longer in use, but can still be access at [https://github.com/HHS-AHRQ/MEPS-summary-tables-archive](https://github.com/HHS-AHRQ/MEPS-summary-tables-archive).
+This version of the MEPS summary tables repository was focuses on creation and formatting of the summary data tables that underly the MEPS-HC sumary tables tool. A previous version of this repository also included HTML and JavaScript to display the tables on a web server. The previous version has been archived, as it is no longer in use, but can still be accessed at [https://github.com/HHS-AHRQ/MEPS-summary-tables-archive](https://github.com/HHS-AHRQ/MEPS-summary-tables-archive).
 
 
 
