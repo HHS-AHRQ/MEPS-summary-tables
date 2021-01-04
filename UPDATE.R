@@ -59,9 +59,9 @@ apps <- c(
   
   # QC tables for new year -- need to update for hc_cond_icd10 to include more years
     log_file <- "update_files/update_log.txt"
-    source("UPDATE_check.R")
+    source("qc/UPDATE_check.R")
   
-  ## STOP!! CHECK LOG (update_files/update_log.txt) before proceeding
+  ## STOP!! CHECK LOG (qc/update_files/update_log.txt) before proceeding
   
   ## Transfer 2016/2017 hc_cond_icd10 tables here before formatting
     

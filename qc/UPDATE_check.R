@@ -2,8 +2,8 @@
 # Check tables new year vs previous year, for anomalies -------------
 
 # Create directories for log files
-  dir.create("update_files/missing", showWarnings = F)
-  dir.create("update_files/different", showWarnings = F)
+  dir.create("qc/update_files/missing", showWarnings = F)
+  dir.create("qc/update_files/different", showWarnings = F)
 
 # Initialize log file
   
