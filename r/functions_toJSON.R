@@ -182,7 +182,7 @@ data_toJSON <- function(appKey, pivot = F) {
 notes_toJSON <- function(appKey, notes = "") {
   dir <- sprintf("../mepstrends/%s", appKey)
   
-  years <- get_puf_names()$Year
+  years <- get_puf_names()$YEAR
   
   # For code tab
   pufNames <- lapply(years, get_puf_names, web = F) %>% setNames(years)

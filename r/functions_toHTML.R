@@ -270,7 +270,7 @@ build_main <- function(pivot = F, include = c("table", "plot", "code"), app_note
         app_notes,
 
         tags$p("This tool is provided as a convenience. It is the responsibility of the user to review
-               results for statistical significance and overall reasonableness."),
+               results for statistical significance and overall reasonableness. Starting with interviews conducted in 2018, the MEPS Household Component questionnaire was revised to improve respondents' reporting of health care use. These improvements likely contribute to observed increases (and may dampen any actual decreases) in events and expenditures from 2016 to 2018, particularly from 2017 to 2018."),
 
         h3("About the data"),
         tags$p("The MEPS Household Component collects data on all members of sample households
