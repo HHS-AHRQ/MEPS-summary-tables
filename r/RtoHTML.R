@@ -18,6 +18,15 @@ ahrq_meta <- HTML(readSource("../html/ahrq_meta.html"))
 ahrq_header <- HTML(readSource("../html/ahrq_header.html"))
 ahrq_footer <- HTML(readSource("../html/ahrq_footer.html"))
 
+# CVP alert banners -----------------------------------------------------------
+
+alert_banner = HTML('<div class="usa-alert usa-alert--warning usa-alert--slim">
+<div class="usa-alert__body">
+<p class="usa-alert__text">The <strong>MEPS Summary Tables</strong> will be moving to a new <strong>AHRQ Data Tools</strong> site the summer of 2021. Please check back here for updated information on how to access the new <strong>AHRQ Data Tools site</strong>, and be sure to bookmark the new link. After December 2021, this web page will no longer be available.</p>
+</div>
+</div>')
+
+
 # Home Page -------------------------------------------------------------------
 
 dir.create("../mepstrends/home/")
@@ -29,7 +38,13 @@ navbar <- tagList(lapply(names(hc_info), navbar_items))
 
 home_body <- tagList(
   div(class = "usa-grid full-screen info-box",
+      
+     
+      
     div(class = "em-container",
+        
+        alert_banner, # Adding CVP alert banner
+        
       h2("Household Component summary tables"),
       tags$p(HTML(infoList[['home']][['description']]))
       )

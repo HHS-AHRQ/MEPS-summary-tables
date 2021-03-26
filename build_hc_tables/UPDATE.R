@@ -19,6 +19,14 @@ apps <- c("hc_use", "hc_care", "hc_ins", "hc_cond_icd10", "hc_pmed") #"hc_cond"
   # mydir = "/Users/emilymitchell/Desktop/MEPS"
   mydir = "C:/MEPS"
   
+  
+  
+  
+  # Temporary: update HTML only (to add CVP alert banners):
+  source("../r/RtoHTML.R", chdir = T)
+  
+  
+  
 
 # Optional: rename existing folder to QC code on previous years ---------------    
 # # still working on this part...

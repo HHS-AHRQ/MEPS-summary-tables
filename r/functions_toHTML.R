@@ -114,10 +114,15 @@ preview_box <- function(appKey) {
 
 # Summary tables pages --------------------------------------------------------
 
+
+
 build_body <- function(info, forms, main) {
   tagList(
     div(class = 'info-box ',
         div(class='full-screen',
+            
+            alert_banner, # Addng CVP alert banner
+            
             h2(info$title, tags$img(src = info$img$src, alt = info$img$alt, class = "app-image")),
             tags$p(info$description),
             tags$p(HTML(info$instructions1)),
@@ -131,6 +136,8 @@ build_body <- function(info, forms, main) {
     )
   )
 }
+
+
 
 
 build_table <- function(pivot, include_DNC = FALSE) {
