@@ -22,7 +22,7 @@ ahrq_footer <- HTML(readSource("../html/ahrq_footer.html"))
 
 alert_banner = HTML('<div class="usa-alert usa-alert--warning usa-alert--slim">
 <div class="usa-alert__body">
-<p class="usa-alert__text">The <strong>MEPS Summary Tables</strong> will be moving to a new <strong>AHRQ Data Tools</strong> site the summer of 2021. Please check back here for updated information on how to access the new <strong>AHRQ Data Tools site</strong>, and be sure to bookmark the new link. After December 2021, this web page will no longer be available.</p>
+<p class="usa-alert__text">The <strong>MEPS Summary Tables</strong> will be moving to a new <strong>AHRQ Data Tools site</strong> the summer of 2021. Please check back here for updated information on how to access the new <strong>AHRQ Data Tools site</strong>, and be sure to bookmark the new link. After December 2021, this web page will no longer be available.</p>
 </div>
 </div>')
 
