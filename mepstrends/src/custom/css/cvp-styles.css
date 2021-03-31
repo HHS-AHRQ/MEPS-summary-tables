@@ -121,3 +121,11 @@ background-color:#faf3d1; }
 .usa-alert--no-icon .usa-alert__body{
   padding-left:0;
 }
+
+.blue {
+  background-color: #E6F5F8;
+}
+
+.blue::before {
+  background-color: #00BDE3;
+}
