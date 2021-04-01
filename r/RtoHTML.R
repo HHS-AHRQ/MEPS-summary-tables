@@ -20,11 +20,20 @@ ahrq_footer <- HTML(readSource("../html/ahrq_footer.html"))
 
 # CVP alert banners -----------------------------------------------------------
 
-alert_banner = HTML('<div class="usa-alert usa-alert--warning usa-alert--slim">
+# yellow-slim (pre-release, June 1, 2021)
+# alert_banner = HTML('<div class="usa-alert usa-alert--warning usa-alert--slim">
+# <div class="usa-alert__body">
+# <p class="usa-alert__text">The <strong>MEPS Summary Tables</strong> will be moving to a new <strong>AHRQ Data Tools site</strong> the summer of 2021. Please check back here for updated information on how to access the new <strong>AHRQ Data Tools site</strong>, and be sure to bookmark the new link. After December 2021, this web page will no longer be available.</p>
+# </div>
+# </div>')
+
+# blue-slim (post-release, July 1, 2021)
+alert_banner = HTML('<div class="usa-alert usa-alert--info usa-alert--slim">
 <div class="usa-alert__body">
-<p class="usa-alert__text">The <strong>MEPS Summary Tables</strong> will be moving to a new <strong>AHRQ Data Tools site</strong> the summer of 2021. Please check back here for updated information on how to access the new <strong>AHRQ Data Tools site</strong>, and be sure to bookmark the new link. After December 2021, this web page will no longer be available.</p>
+<p class="usa-alert__text">The <strong>MEPS Summary Tables</strong> have moved to the new <a href="https://www.datatools.ahrq.gov/">AHRQ Data Tools</a> site. After December 2021, this web page will no longer be available.</p>
 </div>
-</div>')
+</div>
+')
 
 
 # Home Page -------------------------------------------------------------------
@@ -38,13 +47,13 @@ navbar <- tagList(lapply(names(hc_info), navbar_items))
 
 home_body <- tagList(
   div(class = "usa-grid full-screen info-box",
-      
-     
-      
+
+
+
     div(class = "em-container",
-        
+
         alert_banner, # Adding CVP alert banner
-        
+
       h2("Household Component summary tables"),
       tags$p(HTML(infoList[['home']][['description']]))
       )
