@@ -19,7 +19,8 @@ source("functions.R")
 apps <- c(
   "hc_use", "hc_ins", "hc_pmed", 
   "hc_care_access", "hc_care_diab", "hc_care_qual",
-  "hc_cond_icd9",   "hc_cond_icd10") 
+  #"hc_cond_icd9",   
+  "hc_cond_icd10") 
 
 
 # Year (or years) that needs to be run
@@ -89,7 +90,36 @@ apps <- c(
   format_tables(appKey = "hc_care_diab",   years = yrs)
   format_tables(appKey = "hc_care_qual",   years = yrs)
   
-    
+  
+# Prepare formatted tables for delivery to CVP for Tableau dashboards ---------
+  
+  year <- 2019
+  
+  today  <- Sys.Date()
+  newdir <- str_glue("deliveries/DY{year}-{today}")
+  
+  dir.create(newdir, recursive = T)
+  
+  for(app in apps) {
+    str_glue("formatted_tables/{app}/DY{year}.csv") %>%
+      file.copy(str_glue("{newdir}/{app}_{year}.csv"))
+  }
+ 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
