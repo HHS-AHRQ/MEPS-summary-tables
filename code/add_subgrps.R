@@ -28,7 +28,7 @@
   if(year == 1996)
     FYC <- FYC %>% mutate(REGION42 = REGION2, REGION31 = REGION1)
 
-    FYC <- FYC %>%
+  FYC <- FYC %>% as.data.frame() %>% #as_tibble() %>%
     mutate_at(vars(starts_with("REGION")), ~replace(., .< 0, NA)) %>%
     mutate(region = coalesce(REGION, REGION42, REGION31)) %>%
     mutate(region = recode_factor(
@@ -294,8 +294,9 @@
   FYC[,p(evt,"PTR")] <- FYC[,p(evt,"PRV")] + FYC[,p(evt,"TRI")]
   
   FYC[,p(evt,"OTH")] <-
-    FYC[,p(evt,"OFD")] + FYC[,p(evt,"STL")] + FYC[,p(evt,"OPR")] + 
-    FYC[,p(evt,"OPU")] + FYC[,p(evt,"OSR")]
+    FYC[,p(evt,"OFD")] + FYC[,p(evt,"STL")] + 
+    # FYC[,p(evt,"OPR")] + FYC[,p(evt,"OPU")] + -- other public and other private no longer in data
+    FYC[,p(evt,"OSR")]
   
   FYC[,p(evt,"OTZ")] <- 
     FYC[,p(evt,"OTH")] + FYC[,p(evt,"VA")] + FYC[,p(evt,"WCP")]

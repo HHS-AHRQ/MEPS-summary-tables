@@ -7,8 +7,25 @@ p <- paste0
 add_v2X <- function(names) names %>% append(c('agegrps_v2X', 'insurance_v2X'))
 add_v3X <- function(names) names %>% append(c('agegrps_v2X', 'agegrps_v3X'))
 
-is.odd <- function(x) { x %% 2 == 1 }
+is.odd  <- function(x) { x %% 2 == 1 }
+is.even <- function(x) { x %% 2 == 0}
 
+add_tot_sops <- function(df, ev, yr, sop_vars) {
+  doc_sops <- str_glue("{ev}D{sop_vars}{yr}X") %>% sort
+  fac_sops <- str_glue("{ev}F{sop_vars}{yr}X") %>% sort
+  tot_sops <- str_glue("{ev}{sop_vars}{yr}X")  %>% sort %>% c
+  
+  df[, tot_sops] <- df[, doc_sops] + df[, fac_sops]
+  return(df)
+}
+
+rm_evt_key <- function(df, ev, yr, sop_vars) {
+  old_vars <- str_glue("{ev}{sop_vars}{yr}X") %>% sort
+  new_vars <- str_glue("{sop_vars}{yr}X") %>% sort %>% c
+  
+  df[,new_vars] = df[,old_vars]
+  return(df)
+}
 
 # Run functions ---------------------------------------------------------------
 

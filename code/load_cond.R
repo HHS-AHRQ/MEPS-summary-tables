@@ -1,10 +1,11 @@
 
 # Load conditions PUF file
   cond_puf <- read_MEPS(year = year, type = "Conditions") %>%
-    select(DUPERSID, CONDIDX, starts_with("CC"))
+    select(DUPERSID, CONDIDX, starts_with("CC")) %>%
+    zap_labels()
 
 
-# Merge condition cdes
+# Merge condition codes
   
 ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
 ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
@@ -31,28 +32,61 @@ ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Refere
       left_join(condition_codes)
   }
   
+
 # Load event files
-  RX  <- read_MEPS(year = year, type = "RX") %>% rename(EVNTIDX = LINKIDX)
-  IPT <- read_MEPS(year = year, type = "IP")
-  ERT <- read_MEPS(year = year, type = "ER")
-  OPT <- read_MEPS(year = year, type = "OP")
-  OBV <- read_MEPS(year = year, type = "OB")
-  HHT <- read_MEPS(year = year, type = "HH")
+  RX  <- read_MEPS(year = year, type = "RX") %>% rename(EVNTIDX = LINKIDX) %>% zap_labels()
+  IPT <- read_MEPS(year = year, type = "IP") %>% zap_labels()
+  ERT <- read_MEPS(year = year, type = "ER") %>% zap_labels()
+  OPT <- read_MEPS(year = year, type = "OP") %>% zap_labels()
+  OBV <- read_MEPS(year = year, type = "OB") %>% zap_labels()
+  HHT <- read_MEPS(year = year, type = "HH") %>% zap_labels()
   
 # Load event-condition linking file
   clink1 <- read_MEPS(year = year, type = "CLNK") %>%
-    select(DUPERSID, CONDIDX, EVNTIDX)
+    select(DUPERSID, CONDIDX, EVNTIDX) %>%
+    zap_labels()
 
 # Stack events (condition data not collected for DN and OM events)
-  stacked_events <- stack_events(RX, IPT, ERT, OPT, OBV, HHT)
+  
+  sop_vars <- c("SF", "MR", "MD", "PV", "VA", "TR", "OF", "SL", "WC", "OT", "XP")
+  
+  # Add 'total' (dr + facility) payments for hosp events.
+  ERT <- ERT %>% add_tot_sops("ER", yr, sop_vars)
+  OPT <- OPT %>% add_tot_sops("OP", yr, sop_vars)
+  IPT <- IPT %>% add_tot_sops("IP", yr, sop_vars)
+   
+  # Remove event prefix from SOP colnames
+  RX  <- RX  %>% rm_evt_key("RX", yr, sop_vars) 
+  IPT <- IPT %>% rm_evt_key("IP", yr, sop_vars) 
+  ERT <- ERT %>% rm_evt_key("ER", yr, sop_vars) 
+  OPT <- OPT %>% rm_evt_key("OP", yr, sop_vars) 
+  OBV <- OBV %>% rm_evt_key("OB", yr, sop_vars) 
+  HHT <- HHT %>% rm_evt_key("HH", yr, sop_vars) 
+  
+  # Stack events
+  keep_vars <- 
+    c("event", "EVNTIDX", "DUID", "PID", "DUPERSID", "PANEL", "IMPFLAG",
+      str_glue("{sop_vars}{yr}X"),
+      str_glue("PERWT{yr}F"), "VARSTR", "VARPSU") 
+  
+  stacked_events <- bind_rows(
+    RX %>% mutate(event = "RX"), 
+    IPT %>% mutate(event = "IPT"), 
+    ERT %>% mutate(event = "ERT"), 
+    OPT %>% mutate(event = "OPT"), 
+    OBV %>% mutate(event = "OBV"), 
+    HHT %>% mutate(event = "HHT")
+  ) %>% select(all_of(keep_vars))
 
+  
 # Remove 'yr' from colnames
   colnames(stacked_events) <- colnames(stacked_events) %>% gsub(yr,"",.)
   
   stacked_events <- stacked_events %>%
-    mutate(event = data,
-           PRX = PVX + TRX,
-           OZX = OFX + SLX + OTX + ORX + OUX + WCX + VAX) %>%
+    mutate(PRX = PVX + TRX,
+          # OZX = OFX + SLX + OTX + ORX + OUX + WCX + VAX, -- oth public/private dont exist anymore
+           OZX = OFX + SLX + OTX + WCX + VAX
+           ) %>%
     select(DUPERSID, event, EVNTIDX,
            XPX, SFX, MRX, MDX, PRX, OZX)
 

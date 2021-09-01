@@ -3,6 +3,8 @@
 RX <- read_MEPS(year = year, type = "RX") 
 colnames(RX) <- colnames(RX) %>% gsub(yr,"",.)
 
+RX <- RX %>% zap_labels()
+
 if(year <= 1998) RX <- RX %>% rename(PERWTF = WTDPER)
 
 # For 1996-2013, merge with RX Multum Lexicon Addendum files
