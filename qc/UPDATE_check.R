@@ -1,10 +1,15 @@
 
 # Check tables new year vs previous year, for anomalies -------------
 
-# Create directories for log files
-  dir.create("qc/update_files/missing", showWarnings = F)
+# Create directories for log files and delete any old files
+  unlink("qc/update_files/missing", recursive = T)
+  unlink("qc/update_files/different", recursive = T)
+
+  dir.create("qc/update_files/missing",   showWarnings = F)
   dir.create("qc/update_files/different", showWarnings = F)
 
+
+  
 # Initialize log file
   
   sprintf("See update_files/missing for print-outs of sample size (n.csv) for stats that are missing in %s but not in previous 4 years. If sample size in previous years (i.e. coef.y1, coef.y2,...) is small, then missingness is not an issue", hc_year) %>% 
@@ -27,7 +32,14 @@ for(app in apps) { cat("\n", app, "\n");
   yr.4 <- hc_year - 4
   
   if(app == "hc_cond_icd10") {
-   yr.3 <- yr.4 <- yr.2
+   yr.4 <- yr.3
+  }
+  
+  # Only odd years, starting in 2018: 2016, 2017, --, 2019, --, 2021,...
+  if(app == "hc_care_qual") {
+    if(yr.1 > 2017 & is.even(yr.1)) yr.1 <- yr.2
+    if(yr.2 > 2017 & is.even(yr.2)) yr.2 <- yr.3
+    if(yr.3 > 2017 & is.even(yr.3)) yr.3 <- yr.4
   }
   
   yr.0_files <- list.files(sprintf("%s/%s", dir, yr.0))
@@ -102,7 +114,7 @@ for(app in apps) { cat("\n", app, "\n");
       if(nrow(y0.miss) > 0 & csv == "n.csv") {
         write.table(
           y0.miss, 
-          file = sprintf("update_files/missing/%s.csv", app), 
+          file = sprintf("qc/update_files/missing/%s.csv", app), 
           sep = ",", 
           row.names = F)    
       }
@@ -143,7 +155,7 @@ for(app in apps) { cat("\n", app, "\n");
         
         write.table(
           discord, 
-          file = sprintf("update_files/different/%s_%s.csv", app, stat), 
+          file = sprintf("qc/update_files/different/%s_%s.csv", app, stat), 
           sep = ",", 
           row.names = F)   
       }

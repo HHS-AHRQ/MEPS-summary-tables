@@ -33,15 +33,17 @@ QC <- function(name, qc_df) {
 
 # year = 2018
 
+chk_year = 2018
+
 app_years <- list(
-  "hc_use" = c(1996, 2000, 2002, 2005, 2015:2018), 
-  "hc_ins"  = 1996:2018, 
-  "hc_pmed" = 1996:2018, 
-  "hc_care_access" = 2002:2018, 
-  "hc_care_diab"   = 2002:2018, 
-  "hc_care_qual"   = 2002:2017,
-  "hc_cond_icd9"   = 1996:2015,
-  "hc_cond_icd10"  = 2016:2018) 
+  "hc_use" = chk_year, 
+  "hc_ins"  = chk_year, 
+  "hc_pmed" = chk_year, 
+  "hc_care_access" = chk_year, 
+  "hc_care_diab"   = chk_year, 
+  "hc_care_qual"   = 2017,
+ # "hc_cond_icd9"   = 1996:2015,
+  "hc_cond_icd10"  = chk_year) 
 
 # Loop through years ---------------------------------------------------------
 

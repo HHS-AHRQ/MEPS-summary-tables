@@ -12,7 +12,7 @@ library(survey)
 library(MEPS)
 library(readxl)
 library(htmltools)
-#library(haven) -- included in tidyverse
+library(haven) 
 
 source("functions.R")
 
@@ -23,8 +23,11 @@ apps <- c(
 
 
 # Year (or years) that needs to be run
+# OPTIONAL: Make a copy of 'data_tables' folder to run QC years
+#  - rename to 'data_tables - orig'
+
   #year_list <- c(2014, 2018)
-  year_list = 2018
+  year_list = 2019
   hc_year <- max(year_list)
 
   
@@ -58,7 +61,7 @@ apps <- c(
 
   
   # QC tables for new year -- need to update for hc_cond_icd10 to include more years
-    log_file <- "update_files/update_log.txt"
+    log_file <- "qc/update_files/update_log.txt"
     source("qc/UPDATE_check.R")
   
   ## STOP!! CHECK LOG (qc/update_files/update_log.txt) before proceeding
@@ -73,15 +76,20 @@ apps <- c(
 
   source("functions_format.R")  
   
-  format_tables(appKey = "hc_ins",  years = 1996:2018)
-  format_tables(appKey = "hc_pmed", years = 1996:2018)
-  format_tables(appKey = "hc_use",  years = 1996:2018)
+  yrs <- 2019
+    
+  format_tables(appKey = "hc_ins",  years = yrs)
+  format_tables(appKey = "hc_pmed", years = yrs)
+  format_tables(appKey = "hc_use",  years = yrs)
   
-  format_tables(appKey = "hc_cond_icd9",  years = 1996:2015)
-  format_tables(appKey = "hc_cond_icd10", years = 2016:2018)
+  #format_tables(appKey = "hc_cond_icd9",  years = 1996:2015)
+  format_tables(appKey = "hc_cond_icd10", years = yrs)
   
-  format_tables(appKey = "hc_care_access", years = 2002:2018)
-  format_tables(appKey = "hc_care_diab",   years = 2002:2018)
-  format_tables(appKey = "hc_care_qual",   years = 2002:2017)
+  format_tables(appKey = "hc_care_access", years = yrs)
+  format_tables(appKey = "hc_care_diab",   years = yrs)
+  format_tables(appKey = "hc_care_qual",   years = yrs)
   
     
+  
+  
+  

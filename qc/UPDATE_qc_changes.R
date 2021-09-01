@@ -8,9 +8,9 @@
 library(testthat)
 library(tidyverse)
 
-source("functions.R")
-
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+source("../functions.R")
 
 apps <- c(
   "hc_care_access", 
@@ -25,7 +25,6 @@ apps <- c(
 
 # app  <- "hc_cond_icd9"
 
-year <- 2014; chk_apps <- apps %>% pop("hc_cond_icd10");
 year <- 2018; chk_apps <- apps %>% pop("hc_cond_icd9");
 
 
@@ -33,8 +32,8 @@ for(app in chk_apps) { cat("\n\n", app)
   
   yr <- substr(year, 3, 4)
   
-  orig_folder <- str_glue("data_tables - orig/{app}/{year}")
-  new_folder  <- str_glue("data_tables/{app}/{year}")
+  orig_folder <- str_glue("../data_tables - orig/{app}/{year}")
+  new_folder  <- str_glue("../data_tables/{app}/{year}")
   
   orig_csvs <- list.files(orig_folder)
   new_csvs  <- list.files(new_folder)
@@ -49,50 +48,60 @@ for(app in chk_apps) { cat("\n\n", app)
     orig_file <- orig_dup <- read.csv(str_glue("{orig_folder}/{file}"))
     new_file  <- new_dup  <- read.csv(str_glue("{new_folder}/{file}"))
     
-    if(app == "hc_use") {
-      orig_dup <- bind_rows(orig_file, switch_labels(orig_file))
-      new_dup  <- bind_rows(new_file, switch_labels(new_file))
-      
-      # Remove 'Missings' 
-      new_dup  <- new_dup  %>% filter(colLevels != "Missing", rowLevels != "Missing")
-      orig_dup <- orig_dup %>% filter(colLevels != "Missing", rowLevels != "Missing")
-      
-      # Remove non-physician events
-      new_dup <- new_dup %>%
-        filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ"))
-      orig_dup <- orig_dup %>%
-        filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ")) 
-      
-      # Remove SEs for 'n' files
-      if(file == "n.csv") {
-        new_dup  <- new_dup %>% select(-n_se) 
-        orig_dup <- orig_dup %>% select(-n_se) 
-      }
-      
-      
-      # Median SEs are off due to R updates -- need to apply BRR to these
-      if(file == "medEXP.csv") {
-        new_dup  <- new_dup %>% select(-medEXP_se)
-        orig_dup <- orig_dup %>% select(-medEXP_se)
-      }
-      
-    }
+    # if(app == "hc_use") {
+    #   orig_dup <- bind_rows(orig_file, switch_labels(orig_file))
+    #   new_dup  <- bind_rows(new_file, switch_labels(new_file))
+    #   
+    #   # Remove 'Missings' 
+    #   new_dup  <- new_dup  %>% filter(colLevels != "Missing", rowLevels != "Missing")
+    #   orig_dup <- orig_dup %>% filter(colLevels != "Missing", rowLevels != "Missing")
+    #   
+    #   # Remove non-physician events
+    #   new_dup <- new_dup %>%
+    #     filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ"))
+    #   orig_dup <- orig_dup %>%
+    #     filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ")) 
+    #   
+    #   # Remove SEs for 'n' files
+    #   if(file == "n.csv") {
+    #     new_dup  <- new_dup %>% select(-n_se) 
+    #     orig_dup <- orig_dup %>% select(-n_se) 
+    #   }
+    #   
+    #   
+    #   # Median SEs are off due to R updates -- need to apply BRR to these
+    #   if(file == "medEXP.csv") {
+    #     new_dup  <- new_dup %>% select(-medEXP_se)
+    #     orig_dup <- orig_dup %>% select(-medEXP_se)
+    #   }
+    #   
+    # }
+
     
-    if(app == "hc_cond_icd9") {
-      # Round vars for big numbers
+    rnd_by <- ifelse(stat == "totEXP", 2, 6)
+    
+    
+    if(!stat %in% c("n", "n_exp")) {
+      # Round vars 
       orig_dup$stat = orig_dup[,stat]
       orig_dup$se   = orig_dup[,paste0(stat,"_se")]
-      
+  
       new_dup$stat = new_dup[,stat]
       new_dup$se   = new_dup[,paste0(stat,"_se")]
-      
+  
       orig_dup <- orig_dup %>% select(rowGrp, colGrp, rowLevels, colLevels, stat, se)
       new_dup  <- new_dup  %>% select(rowGrp, colGrp, rowLevels, colLevels, stat, se)
-      
-      orig_dup <- orig_dup %>% mutate(stat = round(stat, 4), se = round(se, 4))
-      new_dup  <- new_dup %>% mutate(stat = round(stat, 4), se = round(se, 4))
+  
+      orig_dup <- orig_dup %>% mutate(stat = round(stat, rnd_by), se = round(se, rnd_by))
+      new_dup  <- new_dup %>% mutate(stat = round(stat, rnd_by), se = round(se, rnd_by))
     }
     
+    # temp - remove OZX and OTZ since based on other public and other private
+    # if(app %in% c("hc_cond_icd10", "hc_use")) {
+    #   orig_dup <- orig_dup %>% filter(!colLevels %in% c("OZX", "OTZ"))
+    #   new_dup  <- new_dup  %>% filter(!colLevels %in% c("OZX", "OTZ"))
+    # }
+    # -----------------------------------------------------------------
     
     same <- all_equal(orig_dup, new_dup) 
     
