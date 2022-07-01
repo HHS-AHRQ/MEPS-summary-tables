@@ -23,9 +23,9 @@ apps <- c(
   "hc_use")
 
 
-# app  <- "hc_cond_icd9"
+# app  <- "hc_use"
 
-year <- 2018; chk_apps <- apps %>% pop("hc_cond_icd9");
+year <- 2019; chk_apps <- apps %>% pop("hc_cond_icd9");
 
 
 for(app in chk_apps) { cat("\n\n", app)
@@ -35,6 +35,7 @@ for(app in chk_apps) { cat("\n\n", app)
   orig_folder <- str_glue("../data_tables - orig/{app}/{year}")
   new_folder  <- str_glue("../data_tables/{app}/{year}")
   
+  
   orig_csvs <- list.files(orig_folder)
   new_csvs  <- list.files(new_folder)
   
@@ -42,12 +43,15 @@ for(app in chk_apps) { cat("\n\n", app)
   
   
   for(file in orig_csvs) { cat("\n...",file)
-    
+
+        
     stat = file %>% gsub(".csv","", ., fixed = T)
-    
+
     orig_file <- orig_dup <- read.csv(str_glue("{orig_folder}/{file}"))
     new_file  <- new_dup  <- read.csv(str_glue("{new_folder}/{file}"))
     
+    
+    # ------------------------------------
     # if(app == "hc_use") {
     #   orig_dup <- bind_rows(orig_file, switch_labels(orig_file))
     #   new_dup  <- bind_rows(new_file, switch_labels(new_file))
@@ -76,7 +80,7 @@ for(app in chk_apps) { cat("\n\n", app)
     #   }
     #   
     # }
-
+    # --------------------------------------
     
     rnd_by <- ifelse(stat == "totEXP", 2, 6)
     
@@ -122,6 +126,8 @@ for(app in chk_apps) { cat("\n\n", app)
     } else {
       cat("...ALL SAME!! YAY!!!")
     }
+    
+    
     
   } # end for file in files
   

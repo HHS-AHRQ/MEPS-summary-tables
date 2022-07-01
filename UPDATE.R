@@ -105,13 +105,7 @@ apps <- c(
       file.copy(str_glue("{newdir}/{app}_{year}.csv"))
   }
  
-  
-  
-  
-  
-  
-  
-  
+
   
   
   
