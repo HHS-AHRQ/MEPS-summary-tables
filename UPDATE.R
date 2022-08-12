@@ -16,6 +16,16 @@ library(haven)
 
 source("functions.R")
 
+# Update file names and run this for secure LAN, to use pre-puf files
+# file_names <- list(FYC = "")
+# source("functions_readMEPS.R")
+
+# Specify location of CCSR crosswalk for COND tables
+ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
+ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
+
+
+
 apps <- c(
   "hc_use", "hc_ins", "hc_pmed", 
   "hc_care_access", "hc_care_diab", "hc_care_qual",
@@ -28,7 +38,7 @@ apps <- c(
 #  - rename to 'data_tables - orig'
 
   #year_list <- c(2014, 2018)
-  year_list = 2019
+  year_list = 2020
   hc_year <- max(year_list)
 
   

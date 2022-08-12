@@ -1,15 +1,11 @@
 
 # Load conditions PUF file
-  cond_puf <- read_MEPS(year = year, type = "Conditions") %>%
+  cond_puf <- read_MEPS(year = year, type = "COND") %>%
     select(DUPERSID, CONDIDX, starts_with("CC")) %>%
     zap_labels()
 
 
 # Merge condition codes
-  
-ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
-ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
-
 
   if(year < 2016) {
     condition_codes <- read_csv(ccs_url) %>%
@@ -22,8 +18,17 @@ ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Refere
     
   } else {
     
-    condition_codes <- read_csv(ccsr_url) %>% 
+    ## TEMPORARY!! UN-COMMENT THIS BEFORE RUNNING NEXT
+    condition_codes <- read_csv(ccsr_url) %>%
       setNames(c("CCSR", "CCSR_desc", "Condition"))
+
+    
+    ## TEMPORARY!! TESTING OUT NEW CCSRM CODES --
+    # cdir <- "C:/Users/emily.mitchell/OneDrive - HHS Office of the Secretary/Desktop/AHRQ/MEPS/GROUPS/COND/DXCCSR_collapsed"
+    # condition_codes <- read_csv(
+    #   str_glue("{cdir}/CCSR_CCSRMATCH_xwalk_2022-07-22.csv")) %>%
+    #   setNames(c("CCSR", "CCSR_desc", "Condition")) # %>%
+    #  # select(-Notes)
     
     # Convert multiple CCSRs to separate lines 
     cond <- cond_puf %>% 
