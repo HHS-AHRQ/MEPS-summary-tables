@@ -31,9 +31,9 @@ for(app in apps) { cat("\n", app, "\n");
   yr.3 <- hc_year - 3
   yr.4 <- hc_year - 4
   
-  if(app == "hc_cond_icd10") {
-   yr.4 <- yr.3
-  }
+  # if(app == "hc_cond_icd10") {
+  #  yr.4 <- yr.3
+  # }
   
   # Only odd years, starting in 2018: 2016, 2017, --, 2019, --, 2021,...
   if(app == "hc_care_qual") {
@@ -140,6 +140,13 @@ for(app in apps) { cat("\n", app, "\n");
         others_same = !(p12 | p13 | p14 | p23 | p24 | p34)
       )
     
+    
+    # Optional: print out BOTH to csv
+    write_csv(
+      both %>% 
+        select(-starts_with("p")) %>% 
+        distinct, 
+      file = str_glue("qc/update_files/four_years/{app}_{stat}_4yrs.csv"))
     
     # WARN IF YR0 IS DIFFERENT FROM PREVIOUS 4 YEARS, BUT PREVIOUS YEARS ARE NOT 
     # DIFFERENT FROM EACH OTHER
