@@ -1,7 +1,13 @@
+# Merge onto FYC file to capture all VARSTR, VARPSU values before defining svydesign
 
-DRGpers <- RX %>%
-  filter(!RXNDC %in% c("-9","-15") & !RXDRGNAM %in% c("-9","-15")) %>%
-  group_by(DUPERSID, VARSTR, VARPSU, PERWTF, RXDRGNAM) %>%
+RX_fyc = full_join(
+  RX  %>% select(-VARSTR, -VARPSU, -PERWTF) %>% mutate(inRX = TRUE), 
+  FYC %>% select( VARSTR,  VARPSU,  PERWTF, DUPERSID), by = "DUPERSID")
+
+
+# Summarize to person-drug-level
+DRGpers <- RX_fyc %>%
+  group_by(DUPERSID, VARSTR, VARPSU, PERWTF, RXDRGNAM, inRX) %>%
   summarise(n_RX = sum(count), RXXPX = sum(RXXPX)) %>%
   mutate(count = 1) %>%
   ungroup
@@ -12,11 +18,12 @@ DRGdsgn <- svydesign(
   weights = ~PERWTF,
   data = DRGpers,
   nest = TRUE
-)
+) %>% subset(inRX)
 
 
-TC1pers <- RX %>%
-  group_by(DUPERSID, VARSTR, VARPSU, PERWTF, TC1name) %>%
+# Summarize to person-TC1-level
+TC1pers <- RX_fyc %>%
+  group_by(DUPERSID, VARSTR, VARPSU, PERWTF, TC1name, inRX) %>%
   summarise(n_RX = sum(count), RXXPX = sum(RXXPX)) %>%
   mutate(count = 1) %>%
   ungroup
@@ -27,13 +34,4 @@ TC1dsgn <- svydesign(
   weights = ~PERWTF,
   data = TC1pers,
   nest = TRUE
-)
-
-
-RXdsgn <- svydesign(
-  id = ~VARPSU,
-  strata = ~VARSTR,
-  weights = ~PERWTF,
-  data = RX,
-  nest = TRUE
-)
+) %>% subset(inRX)

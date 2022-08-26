@@ -14,16 +14,15 @@ for(year in year_list) {
   yr <- substring(year, 3, 4)
 
 # Load files and define svydesigns --------------------------------------------
+  source("code/load_fyc.R",  echo = T) # Load FYC file
   source("code/load_pmed.R", echo = T) # Load RX event files
   source("code/dsgn_pmed.R", echo = T) # Define all survey design objects
 
 # Run for prescribed medicines ------------------------------------------------
-  RXsub <- subset(RXdsgn, !RXNDC %in% c("-9","-15") & !RXDRGNAM %in% c("-9","-15"))
-
   res <- list()
   res[["totPOP"]] <- svyby(~count, by = ~RXDRGNAM, FUN = svytotal, design = DRGdsgn)
-  res[["totEXP"]] <- svyby(~RXXPX, by = ~RXDRGNAM, FUN = svytotal, design = RXsub)
-  res[["totEVT"]] <- svyby(~count, by = ~RXDRGNAM, FUN = svytotal, design = RXsub)
+  res[["totEXP"]] <- svyby(~RXXPX, by = ~RXDRGNAM, FUN = svytotal, design = DRGdsgn)
+  res[["totEVT"]] <- svyby(~n_RX,  by = ~RXDRGNAM, FUN = svytotal, design = DRGdsgn)
   res[["n"]]      <- svyby(~count, by = ~RXDRGNAM, FUN = unwtd.count, design = DRGdsgn)
 
   # Format and output to csv
@@ -37,8 +36,8 @@ for(year in year_list) {
 # Run for therapeutic classes -------------------------------------------------
   res <- list()
   res[["totPOP"]] <- svyby(~count, by = ~TC1name, FUN = svytotal, design = TC1dsgn)
-  res[["totEXP"]] <- svyby(~RXXPX, by = ~TC1name, FUN = svytotal, design = RXdsgn)
-  res[["totEVT"]] <- svyby(~count, by = ~TC1name, FUN = svytotal, design = RXdsgn)
+  res[["totEXP"]] <- svyby(~RXXPX, by = ~TC1name, FUN = svytotal, design = TC1dsgn)
+  res[["totEVT"]] <- svyby(~n_RX,  by = ~TC1name, FUN = svytotal, design = TC1dsgn)
   res[["n"]]      <- svyby(~count, by = ~TC1name, FUN = unwtd.count, design = TC1dsgn)
 
   # Format and output to csv
