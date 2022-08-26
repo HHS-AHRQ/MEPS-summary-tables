@@ -14,6 +14,8 @@ library(readxl)
 library(htmltools)
 library(haven) 
 
+options(survey.lonely.psu='adjust')
+
 source("functions.R")
 
 # Update file names and run this for secure LAN, to use pre-puf files
@@ -23,7 +25,6 @@ source("functions.R")
 # Specify location of CCSR crosswalk for COND tables
 ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
 ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
-
 
 
 apps <- c(
@@ -37,7 +38,7 @@ apps <- c(
 # OPTIONAL: Make a copy of 'data_tables' folder to run QC years
 #  - rename to 'data_tables - orig'
 
-  #year_list <- c(2014, 2018)
+  #year_list <- c(2005:2019)
   year_list = 2020
   hc_year <- max(year_list)
 
@@ -61,7 +62,7 @@ apps <- c(
   # Create new tables for data year -- takes about 3 hours
  
   source("run_ins.R")  # ~ 4 min
-  source("run_pmed.R") # ~ 2 min 
+  #source("run_pmed.R") # ~ 2 min 
   
   source("run_care_access.R") # Shift in variables in 2018
   source("run_care_diab.R")   
@@ -87,11 +88,18 @@ apps <- c(
 
   source("functions_format.R")  
   
-  yrs <- 2019
-    
+  yrs <- 2020
+  
+  format_tables(appKey = "hc_use",  years = yrs)  
   format_tables(appKey = "hc_ins",  years = yrs)
+  
   format_tables(appKey = "hc_pmed", years = yrs)
-  format_tables(appKey = "hc_use",  years = yrs)
+  # PMED post-processing: 
+  #  - remove any suppressed rows
+  #  - remove RXDRGNAMs that were masked to therapeutic classes
+  #  - for 1996-2013, remove RXDRGNAM that do not show up in 2014-2019
+  source("code/pmed_postprocessing.R")
+  
   
   #format_tables(appKey = "hc_cond_icd9",  years = 1996:2015)
   format_tables(appKey = "hc_cond_icd10", years = yrs)
@@ -103,7 +111,7 @@ apps <- c(
   
 # Prepare formatted tables for delivery to CVP for Tableau dashboards ---------
   
-  year <- 2019
+  year <- 2020
   
   today  <- Sys.Date()
   newdir <- str_glue("deliveries/DY{year}-{today}")
