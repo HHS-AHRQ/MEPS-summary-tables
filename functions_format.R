@@ -155,6 +155,19 @@ format_tables = function(appKey, years) {
           adult_child = replace(adult_child, adult_child == "child", "Children"))
     }
     
+    # For hc_cond, add '**' to COVID for extra footnote -----------------------
+    if(appKey == "hc_cond_icd10") {
+      
+      fmt_totals <- fmt_totals %>% 
+        mutate(
+          rowLevels = ifelse(
+            rowLevels == "Coronavirus disease (COVID-19)", 
+            "Coronavirus disease (COVID-19)**", rowLevels)
+        )
+      
+    }
+    
+    
     # Add row/col labels and groups -------------------------------------------
     row_labels <- group_labels %>% 
       rename(row_group = group, rowGrp = var, 
