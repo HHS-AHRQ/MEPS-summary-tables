@@ -62,13 +62,13 @@ apps <- c(
   # Create new tables for data year -- takes about 3 hours
  
   source("run_ins.R")  # ~ 4 min
-  #source("run_pmed.R") # ~ 2 min 
+  source("run_pmed.R") # ~ 2 min 
   
   source("run_care_access.R") # Shift in variables in 2018
   source("run_care_diab.R")   
   source("run_care_qual.R")   # Only odd years, starting 2017 (2002-2017, 2019, 2021,...)
   
-  source("run_cond.R") # do NOT run for 2016/2017 -- only available on Secure LAN
+ # source("run_cond.R") # do NOT run for 2016/2017 -- only available on Secure LAN
   source("run_use.R")  # ~ 1 hr 
 
   
@@ -123,11 +123,17 @@ apps <- c(
       file.copy(str_glue("{newdir}/{app}_{year}.csv"))
   }
  
-
-  
-  
-  
-  
+# 
+#   # special 2022-08-29 delivery: All PMED files 1996-2020 (since we fixed some issues)
+#   pmed_files = list()
+#   for(year in 1996:2020) {
+#     DY = paste0("DY", year)
+#     pmed_files[[DY]] = read_csv(str_glue("formatted_tables/hc_pmed/{DY}.csv"))
+#   }
+#   all_pmed_files = bind_rows(pmed_files)
+#   write_csv(all_pmed_files, str_glue("{newdir}/hc_pmed_1996_to_2020.csv"), na = "")
+#   
+#   
   
   
   
