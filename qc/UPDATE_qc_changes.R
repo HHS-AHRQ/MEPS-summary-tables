@@ -23,119 +23,224 @@ apps <- c(
   "hc_use")
 
 
-# app  <- "hc_use"
+apps  <- app <- "hc_pmed"
 
-year <- 2019; chk_apps <- apps %>% pop("hc_cond_icd9");
+years <- 1996:2019; chk_apps <- apps %>% pop("hc_cond_icd9");
+
+years = 1996:2019
 
 
-for(app in chk_apps) { cat("\n\n", app)
+DIFFS <- SUMM <- list()
+for(year in years) { cat("\n\n\n", year)
   
-  yr <- substr(year, 3, 4)
+  for(app in chk_apps) { cat("\n\n", app)
+    
+    yr <- substr(year, 3, 4)
+    
+    #orig_folder <- str_glue("../data_tables - orig/{app}/{year}")
+    #new_folder  <- str_glue("../data_tables/{app}/{year}")
+    
+    orig_folder <- str_glue("../data_tables/{app} - 2022-08-23/{year}")
+    new_folder  <- str_glue("../data_tables/{app}/{year}")
   
-  orig_folder <- str_glue("../data_tables - orig/{app}/{year}")
-  new_folder  <- str_glue("../data_tables/{app}/{year}")
+    
+    orig_csvs <- list.files(orig_folder)
+    new_csvs  <- list.files(new_folder)
+    
+    compare(orig_csvs, new_csvs) 
+    
+    
+    for(file in orig_csvs) { cat("\n...",file)
   
+          
+      stat = file %>% gsub(".csv","", ., fixed = T)
   
-  orig_csvs <- list.files(orig_folder)
-  new_csvs  <- list.files(new_folder)
-  
-  compare(orig_csvs, new_csvs) 
-  
-  
-  for(file in orig_csvs) { cat("\n...",file)
-
+      orig_file <- orig_dup <- read.csv(str_glue("{orig_folder}/{file}"))
+      new_file  <- new_dup  <- read.csv(str_glue("{new_folder}/{file}"))
+      
+      
+      # ------------------------------------
+      # if(app == "hc_use") {
+      #   orig_dup <- bind_rows(orig_file, switch_labels(orig_file))
+      #   new_dup  <- bind_rows(new_file, switch_labels(new_file))
+      #   
+      #   # Remove 'Missings' 
+      #   new_dup  <- new_dup  %>% filter(colLevels != "Missing", rowLevels != "Missing")
+      #   orig_dup <- orig_dup %>% filter(colLevels != "Missing", rowLevels != "Missing")
+      #   
+      #   # Remove non-physician events
+      #   new_dup <- new_dup %>%
+      #     filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ"))
+      #   orig_dup <- orig_dup %>%
+      #     filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ")) 
+      #   
+      #   # Remove SEs for 'n' files
+      #   if(file == "n.csv") {
+      #     new_dup  <- new_dup %>% select(-n_se) 
+      #     orig_dup <- orig_dup %>% select(-n_se) 
+      #   }
+      #   
+      #   
+      #   # Median SEs are off due to R updates -- need to apply BRR to these
+      #   if(file == "medEXP.csv") {
+      #     new_dup  <- new_dup %>% select(-medEXP_se)
+      #     orig_dup <- orig_dup %>% select(-medEXP_se)
+      #   }
+      #   
+      # }
+      # --------------------------------------
+      
+      rnd_by <- ifelse(stat == "totEXP", 2, 4)
+      
+      
+      #if(!stat %in% c("n", "n_exp")) {
+        # Round vars 
+        orig_dup$stat = orig_dup[,stat]
+        orig_dup$se   = orig_dup[,paste0(stat,"_se")]
+    
+        new_dup$stat = new_dup[,stat]
+        new_dup$se   = new_dup[,paste0(stat,"_se")]
+    
+        orig_dup <- orig_dup %>% select(rowGrp, colGrp, rowLevels, colLevels, stat, se)
+        new_dup  <- new_dup  %>% select(rowGrp, colGrp, rowLevels, colLevels, stat, se)
+    
+        orig_dup <- orig_dup %>% mutate(stat = round(stat, rnd_by), se = round(se, rnd_by))
+        new_dup  <- new_dup %>% mutate(stat = round(stat, rnd_by), se = round(se, rnd_by))
         
-    stat = file %>% gsub(".csv","", ., fixed = T)
-
-    orig_file <- orig_dup <- read.csv(str_glue("{orig_folder}/{file}"))
-    new_file  <- new_dup  <- read.csv(str_glue("{new_folder}/{file}"))
-    
-    
-    # ------------------------------------
-    # if(app == "hc_use") {
-    #   orig_dup <- bind_rows(orig_file, switch_labels(orig_file))
-    #   new_dup  <- bind_rows(new_file, switch_labels(new_file))
-    #   
-    #   # Remove 'Missings' 
-    #   new_dup  <- new_dup  %>% filter(colLevels != "Missing", rowLevels != "Missing")
-    #   orig_dup <- orig_dup %>% filter(colLevels != "Missing", rowLevels != "Missing")
-    #   
-    #   # Remove non-physician events
-    #   new_dup <- new_dup %>%
-    #     filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ"))
-    #   orig_dup <- orig_dup %>%
-    #     filter(!colLevels %in% c("OBO", "OPZ"), !rowLevels %in% c("OBO", "OPZ")) 
-    #   
-    #   # Remove SEs for 'n' files
-    #   if(file == "n.csv") {
-    #     new_dup  <- new_dup %>% select(-n_se) 
-    #     orig_dup <- orig_dup %>% select(-n_se) 
-    #   }
-    #   
-    #   
-    #   # Median SEs are off due to R updates -- need to apply BRR to these
-    #   if(file == "medEXP.csv") {
-    #     new_dup  <- new_dup %>% select(-medEXP_se)
-    #     orig_dup <- orig_dup %>% select(-medEXP_se)
-    #   }
-    #   
-    # }
-    # --------------------------------------
-    
-    rnd_by <- ifelse(stat == "totEXP", 2, 6)
-    
-    
-    if(!stat %in% c("n", "n_exp")) {
-      # Round vars 
-      orig_dup$stat = orig_dup[,stat]
-      orig_dup$se   = orig_dup[,paste0(stat,"_se")]
-  
-      new_dup$stat = new_dup[,stat]
-      new_dup$se   = new_dup[,paste0(stat,"_se")]
-  
-      orig_dup <- orig_dup %>% select(rowGrp, colGrp, rowLevels, colLevels, stat, se)
-      new_dup  <- new_dup  %>% select(rowGrp, colGrp, rowLevels, colLevels, stat, se)
-  
-      orig_dup <- orig_dup %>% mutate(stat = round(stat, rnd_by), se = round(se, rnd_by))
-      new_dup  <- new_dup %>% mutate(stat = round(stat, rnd_by), se = round(se, rnd_by))
-    }
-    
-    # temp - remove OZX and OTZ since based on other public and other private
-    # if(app %in% c("hc_cond_icd10", "hc_use")) {
-    #   orig_dup <- orig_dup %>% filter(!colLevels %in% c("OZX", "OTZ"))
-    #   new_dup  <- new_dup  %>% filter(!colLevels %in% c("OZX", "OTZ"))
-    # }
-    # -----------------------------------------------------------------
-    
-    same <- all_equal(orig_dup, new_dup) 
-    
-    if(same != TRUE) {
-      cat('\n')
-      print('In ORIG only')
-      diff1 <- setdiff(orig_dup, new_dup); 
-      diff1 %>% head %>% print;
-      #diff1 %>% count(rowGrp, colGrp) %>% print
+        
+        both = full_join(
+          orig_dup, new_dup, 
+          by = c("rowGrp", "colGrp", "rowLevels", "colLevels"),
+          suffix = c(".old", ".new"))
+        
+        diffs = both %>% 
+          mutate(
+            stat_diff = stat.new - stat.old,
+            se_diff   = se.old - se.new,
+            stat_is_diff = abs(stat_diff) > 1E-4,
+            se_is_diff   = abs(se_diff) > 1E-4,
+            new_is_missing = is.na(stat.new)|is.na(se.new),
+            old_is_missing = is.na(stat.old)|is.na(se.old),
+            new_is_smaller = stat_diff < -1E-4)
+        
+        
+        diff_summ = diffs %>% count(
+          rowGrp, stat_is_diff, se_is_diff, 
+          new_is_missing, old_is_missing, new_is_smaller) 
+        
+        
+        # # 2008 is weird -- check
+        # 
+        # diffs %>% 
+        #   filter(stat_is_diff)
+        # 
+        # 
+        # 
+        
+        # Store diffs and diff_summ for further analysis
+        chk_id = str_glue("{app}_{year}_{stat}")
+        
+        DIFFS[[chk_id]] = diffs %>% mutate(app = app, year = year, stat = stat)
+        SUMM[[chk_id]]  = diff_summ %>% mutate(app = app, year = year, stat = stat)
+          
+        #print(stat_diffs)
+        #print(se_diffs)
+        
+      #}
       
-      print('In NEW only')
-      diff2 <- setdiff(new_dup, orig_dup); 
-      diff2 %>% head %>% print;
-      #diff2 %>% count(rowGrp, colGrp) %>% print
+    
+      # For PMED, comparing values after editing to use all VARSTR, VARPSU from FYC file
       
-      #diff1 %>% as_tibble() %>% count(rowGrp, colGrp) %>% print(n = 100)
-      #diff2 %>% as_tibble() %>% count(colGrp, rowGrp) %>% print(n = 100)
-    } else {
-      cat("...ALL SAME!! YAY!!!")
-    }
+    
+      # temp - remove OZX and OTZ since based on other public and other private
+      # if(app %in% c("hc_cond_icd10", "hc_use")) {
+      #   orig_dup <- orig_dup %>% filter(!colLevels %in% c("OZX", "OTZ"))
+      #   new_dup  <- new_dup  %>% filter(!colLevels %in% c("OZX", "OTZ"))
+      # }
+      # -----------------------------------------------------------------
+      
+      # same <- all_equal(orig_dup, new_dup) 
+      # 
+      # if(same != TRUE) {
+      #   cat('\n')
+      #   print('In ORIG only')
+      #   diff1 <- setdiff(orig_dup, new_dup); 
+      #   diff1 %>% print;
+      #   #diff1 %>% count(rowGrp, colGrp) %>% print
+      #   
+      #   print('In NEW only')
+      #   diff2 <- setdiff(new_dup, orig_dup); 
+      #   diff2 %>% print;
+      #   #diff2 %>% count(rowGrp, colGrp) %>% print
+      #   
+      #   #diff1 %>% as_tibble() %>% count(rowGrp, colGrp) %>% print(n = 100)
+      #   #diff2 %>% as_tibble() %>% count(colGrp, rowGrp) %>% print(n = 100)
+      # } else {
+      #   cat("...ALL SAME!! YAY!!!")
+      # }
+      
+      
+      
+    } # end for file in files
     
     
-    
-  } # end for file in files
-  
-  
-} # end for app in apps
+  } # end for app in apps
+
+} # end for year in years
 
 
 
+SUMM_all = bind_rows(SUMM) %>% as_tibble
+
+
+# NEW should not be missing any rows (should be all FALSE): PASS
+SUMM_all %>% count(new_is_missing) 
+
+# TC1name should not be different -- 2008 fail due to rounding errors
+SUMM_all %>% 
+  filter(rowGrp == "TC1name") %>% 
+  filter(stat_is_diff) %>% print(n = 100)
+
+# NEW should only be bigger (since adding more rows to RXDRGNAMs) -- 2008 fail
+SUMM_all %>% 
+  filter(new_is_smaller) %>% 
+  count(new_is_smaller, year, stat) 
+
+
+SUMM_all %>% 
+  filter(rowGrp == "RXDRGNAM") %>% 
+  filter(!old_is_missing) %>% 
+  filter(stat_is_diff, !se_is_diff) %>% 
+  select(rowGrp, stat_is_diff, se_is_diff, n, year, stat) 
+
+SUMM_all %>% 
+  filter(rowGrp == "RXDRGNAM") %>% 
+  filter(!old_is_missing) %>% 
+ # filter(year %in% 1996:1999) %>% 
+ # filter(year %in% 2000:2004) %>% 
+ # filter(year %in% 2005:2008) %>% 
+ # filter(year %in% 2005:2012) %>% 
+  filter(year %in% 2013:2019) %>% 
+  select(rowGrp, stat_is_diff, n, year, stat) %>% 
+  distinct %>% 
+  pivot_wider(names_from = "stat_is_diff", values_from = "n") %>% 
+  print(n = 100)
+
+
+DIFFS_all %>% 
+  #filter(stat_diff > 5, se_diff < 1E-4) %>% 
+  filter(stat_diff < 1E-5, se_diff < -5) %>% 
+  count(rowGrp, year)
+
+
+DIFFS_all = bind_rows(DIFFS) %>% as_tibble()
+
+DIFFS_all %>% write_csv("diffs.csv")
+
+DIFFS_all %>% filter(se_is_diff, rowGrp == "TC1name") %>% View
+
+# DIFFS_all %>% 
+#   filter(rowLevels == "SIMVASTATIN") %>% write_csv("simvastatin.csv")
 
 
 # chk <- full_join(orig_dup, new_dup, 
