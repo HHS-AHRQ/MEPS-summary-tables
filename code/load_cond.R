@@ -18,18 +18,18 @@
     
   } else {
     
-    ## TEMPORARY!! UN-COMMENT THIS BEFORE RUNNING NEXT
-    condition_codes <- read_csv(ccsr_url) %>%
-      setNames(c("CCSR", "CCSR_desc", "Condition"))
+    # ## TEMPORARY!! NEED TO UPDATE GITHUB XWALK WITH NEW CATEGORIES
+    # condition_codes <- read_csv(ccsr_url) %>%
+    #   setNames(c("CCSR", "CCSR_desc", "Condition"))
 
     
-    ## TEMPORARY!! TESTING OUT NEW CCSRM CODES --
-    # cdir <- "C:/Users/emily.mitchell/OneDrive - HHS Office of the Secretary/Desktop/AHRQ/MEPS/GROUPS/COND/DXCCSR_collapsed"
-    # condition_codes <- read_csv(
-    #   str_glue("{cdir}/CCSR_CCSRMATCH_xwalk_2022-07-22.csv")) %>%
-    #   setNames(c("CCSR", "CCSR_desc", "Condition")) # %>%
-    #  # select(-Notes)
-    
+    # TEMPORARY!! TESTING OUT NEW CCSRM CODES --
+    cdir <- "C:/Users/emily.mitchell/OneDrive - HHS Office of the Secretary/Desktop/AHRQ/MEPS/GROUPS/COND/DXCCSR_collapsed"
+    condition_codes <- read_excel(
+      str_glue("{cdir}/CCSR_CCSRMATCH_xwalk_2022-12-16.xlsx"), skip = 2) %>%
+      setNames(c("CCSR", "CCSR_desc", "Condition", "Notes")) %>%
+      select(-Notes)
+
     # Convert multiple CCSRs to separate lines 
     cond <- cond_puf %>% 
       gather(CCSRnum, CCSR, CCSR1X:CCSR3X) %>% 
@@ -98,11 +98,11 @@
   
 # Merge link file
   cond <- cond %>%
-    full_join(clink1, by = c("DUPERSID", "CONDIDX")) %>%
+    full_join(clink1, by = c("DUPERSID", "CONDIDX"), relationship = "many-to-many") %>%
     distinct(DUPERSID, EVNTIDX, Condition, .keep_all=T)
   
 # Merge events with conditions-link file and FYCsub
-  all_events <- full_join(stacked_events, cond, by = c("DUPERSID", "EVNTIDX")) %>%
+  all_events <- full_join(stacked_events, cond, by = c("DUPERSID", "EVNTIDX"), relationship = "many-to-many") %>%
     filter(!is.na(Condition), XPX >= 0) %>%
     mutate(count = 1) %>%
     full_join(FYCsub, by = "DUPERSID")

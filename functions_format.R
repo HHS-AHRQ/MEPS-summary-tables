@@ -76,6 +76,7 @@ format_tables = function(appKey, years) {
     }
     
     # Stack, remove '_v2' suffix, and add level labels
+    # '_v2' is for demographic groups that have multiple breakout groups (e.g. age groups, insurance) 
     all_tbls <- bind_rows(tbs) %>% rm_v2 %>% add_keys(level_labels)
     
     
@@ -95,10 +96,10 @@ format_tables = function(appKey, years) {
       n_exp    <- bind_rows(n_exp,    switch_labels(n_exp))    %>% distinct
     }
     
-    all_tbls <- all_tbls %>% left_join(n_df)
+    all_tbls <- all_tbls %>% left_join(n_df, relationship = "many-to-many")
     
     if(has_nexp) 
-      all_tbls <- all_tbls %>% left_join(n_exp)
+      all_tbls <- all_tbls %>% left_join(n_exp, relationship = "many-to-many")
     
     
     # Format tables -----------------------------------------------------------
@@ -132,11 +133,19 @@ format_tables = function(appKey, years) {
              # suppress = replace(suppress, special_pct, FALSE),
              asterisk = ifelse(RSE > 0.3 & !suppress, "*", "")) %>%
       
-      mutate(value = ifelse(suppress, NA, value/denom),
-             se    = ifelse(suppress, NA, se/denom))  %>%
+      mutate(
+        value = ifelse(suppress, NA, value/denom),
+        se    = ifelse(suppress, NA, se/denom))  %>%
+      
+      # Add rounded value and se for Tableau display
+      # >> !95% CIs are calculated in TABLEAU and should be based on the full (unrounded values)
+      mutate(
+        value_rd = round(value, rnd_digits), 
+        se_rd    = round(se, se_digits)) %>% 
       
       select(Year, stat_group, stat_var, stat_label,
-             rowGrp, rowLevels, colGrp, colLevels, value, se,
+             rowGrp, rowLevels, colGrp, colLevels, 
+             value, se, value_rd, se_rd,
              asterisk, Percent, sample_size, adjText)
 
     
@@ -154,18 +163,7 @@ format_tables = function(appKey, years) {
           adult_child = replace(adult_child, adult_child == "adult", "Adults"),
           adult_child = replace(adult_child, adult_child == "child", "Children"))
     }
-    
-    # For hc_cond, add '**' to COVID for extra footnote -----------------------
-    if(appKey == "hc_cond_icd10") {
-      
-      fmt_totals <- fmt_totals %>% 
-        mutate(
-          rowLevels = ifelse(
-            rowLevels == "Coronavirus disease (COVID-19)", 
-            "Coronavirus disease (COVID-19)**", rowLevels)
-        )
-      
-    }
+
     
     
     # Add row/col labels and groups -------------------------------------------
@@ -254,11 +252,16 @@ format_tables = function(appKey, years) {
       
       rename(row_var = rowGrp, col_var = colGrp) %>%
       
+      # Replace "(none)" with "" for row_var, row_label, col_var, col_label
+      #  >> CVP request in May 2023
+      mutate(across(everything(), ~ifelse(. == "(none)", "", .))) %>% 
+      
       select(one_of(
         "Year", "stat_group", "stat_var", "stat_label",
         "row_group", "row_var", "row_label", "rowLevels",
         "col_group", "col_var", "col_label", "colLevels", 
-        "adult_child", "value", "se", "asterisk", 
+        "adult_child", "value", "se", "value_rd", "se_rd",
+        "asterisk", 
         "Percent", "sample_size", "caption")) %>%
       
       mutate(
@@ -280,7 +283,7 @@ format_tables = function(appKey, years) {
     out_tbl[duplicated(qc_dups)|duplicated(qc_dups, fromLast = T),] %>% print
  
     
-    write_csv(out_tbl, file = str_glue("{fmt_dir}/DY{year}.csv"), na = "--")
+    write_csv(out_tbl, file = str_glue("{fmt_dir}/DY{year}.csv"), na = "")
     
     
   } # end for year in years

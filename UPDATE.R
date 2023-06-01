@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Emily Mitchell
-# Updated: 12/22/2020
+# Updated: 5/22/2023
 # 
 # MEPS tables creation
 #  - Run this code to update MEPS tables for new data years
@@ -39,7 +39,7 @@ apps <- c(
 #  - rename to 'data_tables - orig'
 
   #year_list <- c(2005:2019)
-  year_list = 2020
+  year_list = 2016:2020
   hc_year <- max(year_list)
 
   
@@ -56,9 +56,6 @@ apps <- c(
   
 # Create tables for new data year ---------------------------------------------
 
-  ## !! For hc_cond icd10 versions (2016, 2017), need to build tables on secure
-  ## !! LAN, since CCSR codes are not on PUFs 
-
   # Create new tables for data year -- takes about 3 hours
  
   source("run_ins.R")  # ~ 4 min
@@ -68,7 +65,7 @@ apps <- c(
   source("run_care_diab.R")   
   source("run_care_qual.R")   # Only odd years, starting 2017 (2002-2017, 2019, 2021,...)
   
- # source("run_cond.R") # do NOT run for 2016/2017 -- only available on Secure LAN
+  source("run_cond.R") # 5/22/23: updating with new groups for 2016-2020
   source("run_use.R")  # ~ 1 hr 
 
   
@@ -78,8 +75,7 @@ apps <- c(
   
   ## STOP!! CHECK LOG (qc/update_files/update_log.txt) before proceeding
   
-  ## Transfer 2016/2017 hc_cond_icd10 tables here before formatting
-    
+
   
 # Format tables --------------------------------------------------------------
     
@@ -88,7 +84,7 @@ apps <- c(
 
   source("functions_format.R")  
   
-  yrs <- 2020
+  yrs <- 2016:2020
   
   format_tables(appKey = "hc_use",  years = yrs)  
   format_tables(appKey = "hc_ins",  years = yrs)
@@ -98,11 +94,13 @@ apps <- c(
   #  - remove any suppressed rows
   #  - remove RXDRGNAMs that were masked to therapeutic classes
   #  - for 1996-2013, remove RXDRGNAM that do not show up in 2014-2019
-  source("code/pmed_postprocessing.R")
+  source("code/postprocessing_pmed.R")
   
   
   #format_tables(appKey = "hc_cond_icd9",  years = 1996:2015)
   format_tables(appKey = "hc_cond_icd10", years = yrs)
+  source("code/postprocessing_cond.R")
+  
   
   format_tables(appKey = "hc_care_access", years = yrs)
   format_tables(appKey = "hc_care_diab",   years = yrs)
@@ -118,12 +116,19 @@ apps <- c(
   
   dir.create(newdir, recursive = T)
   
+ #apps = "hc_cond_icd10"
   for(app in apps) {
     str_glue("formatted_tables/{app}/DY{year}.csv") %>%
       file.copy(str_glue("{newdir}/{app}_{year}.csv"))
   }
  
-# 
+# special delivery 2023-05-26: Updated COND tables for 2016-2020
+#  - updated CCSR groupings after Spring 2022 review
+#  - now using PUFs for 2016/2017 data (instead of secure LAN data)
+#  - adding BODY system to COND tables
+
+
+  
 #   # special 2022-08-29 delivery: All PMED files 1996-2020 (since we fixed some issues)
 #   pmed_files = list()
 #   for(year in 1996:2020) {
@@ -135,9 +140,5 @@ apps <- c(
 #   
 #   
   
-  
-  
-  
-  
-  
+    
   
