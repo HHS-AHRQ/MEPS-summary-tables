@@ -23,11 +23,10 @@ apps <- c(
   "hc_use")
 
 
-apps  <- app <- "hc_pmed"
+chk_apps <- apps  <- app <- "hc_pmed"
 
-years <- 1996:2019; chk_apps <- apps %>% pop("hc_cond_icd9");
 
-years = 1996:2019
+years = 2020:2021
 
 
 DIFFS <- SUMM <- list()
@@ -37,13 +36,11 @@ for(year in years) { cat("\n\n\n", year)
     
     yr <- substr(year, 3, 4)
     
-    #orig_folder <- str_glue("../data_tables - orig/{app}/{year}")
-    #new_folder  <- str_glue("../data_tables/{app}/{year}")
-    
-    orig_folder <- str_glue("../data_tables/{app} - 2022-08-23/{year}")
+    orig_folder <- str_glue("../data_tables/{app} - orig/{year}")
     new_folder  <- str_glue("../data_tables/{app}/{year}")
+
+
   
-    
     orig_csvs <- list.files(orig_folder)
     new_csvs  <- list.files(new_folder)
     
@@ -191,57 +188,66 @@ for(year in years) { cat("\n\n\n", year)
 
 
 SUMM_all = bind_rows(SUMM) %>% as_tibble
-
-
-# NEW should not be missing any rows (should be all FALSE): PASS
-SUMM_all %>% count(new_is_missing) 
-
-# TC1name should not be different -- 2008 fail due to rounding errors
-SUMM_all %>% 
-  filter(rowGrp == "TC1name") %>% 
-  filter(stat_is_diff) %>% print(n = 100)
-
-# NEW should only be bigger (since adding more rows to RXDRGNAMs) -- 2008 fail
-SUMM_all %>% 
-  filter(new_is_smaller) %>% 
-  count(new_is_smaller, year, stat) 
-
-
-SUMM_all %>% 
-  filter(rowGrp == "RXDRGNAM") %>% 
-  filter(!old_is_missing) %>% 
-  filter(stat_is_diff, !se_is_diff) %>% 
-  select(rowGrp, stat_is_diff, se_is_diff, n, year, stat) 
-
-SUMM_all %>% 
-  filter(rowGrp == "RXDRGNAM") %>% 
-  filter(!old_is_missing) %>% 
- # filter(year %in% 1996:1999) %>% 
- # filter(year %in% 2000:2004) %>% 
- # filter(year %in% 2005:2008) %>% 
- # filter(year %in% 2005:2012) %>% 
-  filter(year %in% 2013:2019) %>% 
-  select(rowGrp, stat_is_diff, n, year, stat) %>% 
-  distinct %>% 
-  pivot_wider(names_from = "stat_is_diff", values_from = "n") %>% 
-  print(n = 100)
-
-
-DIFFS_all %>% 
-  #filter(stat_diff > 5, se_diff < 1E-4) %>% 
-  filter(stat_diff < 1E-5, se_diff < -5) %>% 
-  count(rowGrp, year)
-
-
 DIFFS_all = bind_rows(DIFFS) %>% as_tibble()
 
+SUMM_all
+
+DIFFS_all
 DIFFS_all %>% write_csv("diffs.csv")
 
-DIFFS_all %>% filter(se_is_diff, rowGrp == "TC1name") %>% View
 
+
+# OLD QC ------------------------------------------------------------------
+# 
+# # NEW should not be missing any rows (should be all FALSE): PASS
+# SUMM_all %>% count(new_is_missing) 
+# 
+# # TC1name should not be different -- 2008 fail due to rounding errors
+# SUMM_all %>% 
+#   filter(rowGrp == "TC1name") %>% 
+#   filter(stat_is_diff) %>% print(n = 100)
+# 
+# # NEW should only be bigger (since adding more rows to RXDRGNAMs) -- 2008 fail
+# SUMM_all %>% 
+#   filter(new_is_smaller) %>% 
+#   count(new_is_smaller, year, stat) 
+# 
+# 
+# SUMM_all %>% 
+#   filter(rowGrp == "RXDRGNAM") %>% 
+#   filter(!old_is_missing) %>% 
+#   filter(stat_is_diff, !se_is_diff) %>% 
+#   select(rowGrp, stat_is_diff, se_is_diff, n, year, stat) 
+# 
+# SUMM_all %>% 
+#   filter(rowGrp == "RXDRGNAM") %>% 
+#   filter(!old_is_missing) %>% 
+#  # filter(year %in% 1996:1999) %>% 
+#  # filter(year %in% 2000:2004) %>% 
+#  # filter(year %in% 2005:2008) %>% 
+#  # filter(year %in% 2005:2012) %>% 
+#   filter(year %in% 2013:2019) %>% 
+#   select(rowGrp, stat_is_diff, n, year, stat) %>% 
+#   distinct %>% 
+#   pivot_wider(names_from = "stat_is_diff", values_from = "n") %>% 
+#   print(n = 100)
+# 
+# 
 # DIFFS_all %>% 
-#   filter(rowLevels == "SIMVASTATIN") %>% write_csv("simvastatin.csv")
-
+#   #filter(stat_diff > 5, se_diff < 1E-4) %>% 
+#   filter(stat_diff < 1E-5, se_diff < -5) %>% 
+#   count(rowGrp, year)
+# 
+# 
+# DIFFS_all = bind_rows(DIFFS) %>% as_tibble()
+# 
+# DIFFS_all %>% write_csv("diffs.csv")
+# 
+# DIFFS_all %>% filter(se_is_diff, rowGrp == "TC1name") %>% View
+# 
+# # DIFFS_all %>% 
+# #   filter(rowLevels == "SIMVASTATIN") %>% write_csv("simvastatin.csv")
+# 
 
 # chk <- full_join(orig_dup, new_dup, 
 #                  by = c("rowGrp", "colGrp", "rowLevels", "colLevels"))

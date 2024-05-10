@@ -24,12 +24,7 @@ source("functions.R")
 
 # Specify location of CCSR crosswalk for COND tables
 # ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
-# ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
-
-
-# 8/28/23: pulling from local directory, since I haven't pushed to GitHub yet
-ccsr_url <- "C:/Users/emily.mitchell/OneDrive - HHS Office of the Secretary/Desktop/GitHub/hhs_ahrq/MEPS/Quick_Reference_Guides/meps_ccsr_conditions.csv"
-
+ ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
 
 apps <- c(
   "hc_use", "hc_ins", "hc_pmed", 
@@ -39,11 +34,12 @@ apps <- c(
 
 
 # Year (or years) that needs to be run
+#
 # OPTIONAL: Make a copy of 'data_tables' folder to run QC years
 #  - rename to 'data_tables - orig'
 
-  
-  year_list = 2020
+
+  year_list = 2020:2021  # 5/10/24 - re-running PMED tables with TC1 edit
   #year_list = 2021
   hc_year <- max(year_list)
 
@@ -91,7 +87,7 @@ apps <- c(
 
   source("functions_format.R")  
   
-  yrs <- 2020
+  yrs <- 2020:2021
   
   format_tables(appKey = "hc_use",  years = yrs)  
   format_tables(appKey = "hc_ins",  years = yrs)
@@ -112,6 +108,8 @@ apps <- c(
   format_tables(appKey = "hc_care_access", years = yrs)
   format_tables(appKey = "hc_care_diab",   years = yrs)
   format_tables(appKey = "hc_care_qual",   years = yrs)
+  
+  
   
   
 # Prepare formatted tables for delivery to CVP for Tableau dashboards ---------

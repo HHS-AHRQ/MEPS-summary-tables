@@ -15,6 +15,20 @@ if(year <= 2013) {
     left_join(Multum, by = c("DUPERSID", "RXRECIDX"))
 }
 
+# For 2020 and 2021, need to manually edit 2 RXNDC values
+if (year %in% c(2020, 2021)) {
+  
+  edit_ndcs = c("49502019671","49502019675")
+  
+  RX <- RX %>% 
+    mutate(
+      RXDRGNAM = ifelse(RXNDC %in% edit_ndcs, "INSULIN GLARGINE", RXDRGNAM),
+      TC1      = ifelse(RXNDC %in% edit_ndcs, 358, TC1),
+      TC1S1    = ifelse(RXNDC %in% edit_ndcs, 99, TC1S1),
+      TC1S1_1  = ifelse(RXNDC %in% edit_ndcs, 215, TC1S1_1)
+    )
+}
+
 
 # Define TC1 names (from Codebook documentation) 
 RX <- RX %>%
