@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 # Emily Mitchell
-# Updated: 5/22/2023
+# Updated: 8/28/2023
 # 
 # MEPS tables creation
 #  - Run this code to update MEPS tables for new data years
@@ -23,8 +23,12 @@ source("functions.R")
 # source("functions_readMEPS.R")
 
 # Specify location of CCSR crosswalk for COND tables
-ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
-ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
+# ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
+# ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
+
+
+# 8/28/23: pulling from local directory, since I haven't pushed to GitHub yet
+ccsr_url <- "C:/Users/emily.mitchell/OneDrive - HHS Office of the Secretary/Desktop/GitHub/hhs_ahrq/MEPS/Quick_Reference_Guides/meps_ccsr_conditions.csv"
 
 
 apps <- c(
@@ -38,8 +42,9 @@ apps <- c(
 # OPTIONAL: Make a copy of 'data_tables' folder to run QC years
 #  - rename to 'data_tables - orig'
 
-  #year_list <- c(2005:2019)
-  year_list = 2016:2020
+  
+  year_list = 2020
+  #year_list = 2021
   hc_year <- max(year_list)
 
   
@@ -66,6 +71,8 @@ apps <- c(
   source("run_care_qual.R")   # Only odd years, starting 2017 (2002-2017, 2019, 2021,...)
   
   source("run_cond.R") # 5/22/23: updating with new groups for 2016-2020
+  
+  
   source("run_use.R")  # ~ 1 hr 
 
   
@@ -84,7 +91,7 @@ apps <- c(
 
   source("functions_format.R")  
   
-  yrs <- 2016:2020
+  yrs <- 2020
   
   format_tables(appKey = "hc_use",  years = yrs)  
   format_tables(appKey = "hc_ins",  years = yrs)

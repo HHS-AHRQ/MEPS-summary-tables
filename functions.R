@@ -102,7 +102,7 @@ add_totals <- function(df, var = 'row') {
   out <- bind_rows(df, all_totals) %>% select(-var, -lev)
   
   # If 'Any event' is already calculated, remove the calculated version
-  distinct_names <- out %>% select(-value, -se, -sample_size) %>% colnames
+  distinct_names <- out %>% select(-matches("value"), -matches("se"), -sample_size) %>% colnames
   distinct_out   <- out %>% distinct(across(all_of(distinct_names)), .keep_all = T)
 
   return(distinct_out)

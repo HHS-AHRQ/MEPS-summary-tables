@@ -57,6 +57,7 @@
   
   stacked_events <- bind_rows(
     RX %>% mutate(event = "RX"), 
+    DVT %>% mutate(event = "DVT"), 
     IPT %>% mutate(event = "IPT"), 
     ERT %>% mutate(event = "ERT"), 
     OPT %>% mutate(event = "OPT"), 

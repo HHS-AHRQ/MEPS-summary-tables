@@ -95,10 +95,10 @@ for(app in apps) { cat("\n", app, "\n");
     s.4 <- s.4 %>% rename(coef.y4 = stat, se.y4 = se)
     
     both <- s.0 %>% 
-      full_join(s.1, by = by) %>% 
-      full_join(s.2, by = by) %>%
-      full_join(s.3, by = by) %>%
-      full_join(s.4, by = by) 
+      full_join(s.1, by = by, relationship = "many-to-many") %>% 
+      full_join(s.2, by = by, relationship = "many-to-many") %>%
+      full_join(s.3, by = by, relationship = "many-to-many") %>%
+      full_join(s.4, by = by, relationship = "many-to-many") 
 
     # WARN IF COEF IS MISSING IN NEW YEAR BUT NOT PREVIOUS 2 YEARS  
       y0.miss <- both %>% 

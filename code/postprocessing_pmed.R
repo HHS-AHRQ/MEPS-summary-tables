@@ -30,7 +30,7 @@ for(year in yrs) {
     filter(hasNDC == 0) %>% 
     pull(RXDRGNAM) %>% unique
   
-  # Load in know Therapeutic class names
+  # Load in known Therapeutic class names
   knownTC = read.csv("dictionaries/pmed_classNames.csv") %>% pull(ClassName)
   
   
@@ -57,13 +57,13 @@ for(year in yrs) {
   chk_remaining = pmed_out %>% filter(rowLevels %in% missingNDC)
   
   if(nrow(chk_remaining) > 0) {
-    print(" ----------   WARNING!! Some rows have all missing NDCs but are not listed in known TC file. Want to add these?")
+    print(" ----------   WARNING!! Some rows have all missing NDCs but are not listed in known TC file (dictionaries/pmed_classNames.csv). Want to add these?")
     print(chk_remaining %>% select(Year, stat_group, stat_var, row_var, rowLevels, value, se, sample_size))
   }
 
   # Write out new file --------------------------------------------------------
   
-  write_csv(pmed_out, file = csv_name)
+  write_csv(pmed_out, file = csv_name, na = "")
   
 }
 
@@ -90,23 +90,23 @@ for(year in yrs) {
 # For 1996-2013, remove RXDRGNAM that do not show up in 2014-2019 -------------
 #  - additional masking steps were implemented in 2013
 
-edit_yrs = yrs[yrs < 2014]
-
-keep_rxdrgnams = read.csv("dictionaries/pmed_RXDRGNAMs_2014-2019.csv") %>% 
-  pull(rowLevels) %>% 
-  unique
-
-for(year in edit_yrs) {
-  
-  csv_name = str_glue("formatted_tables/hc_pmed/DY{year}.csv")
-  pmed_fmt = read.csv(csv_name)
-  
-  pmed_out = pmed_fmt %>% 
-    filter(row_var == "TC1name" | rowLevels %in% keep_rxdrgnams)
-  
-  # Write out new file 
-  write_csv(pmed_out, file = csv_name)
-}
+# edit_yrs = yrs[yrs < 2014]
+# 
+# keep_rxdrgnams = read.csv("dictionaries/pmed_RXDRGNAMs_2014-2019.csv") %>% 
+#   pull(rowLevels) %>% 
+#   unique
+# 
+# for(year in edit_yrs) {
+#   
+#   csv_name = str_glue("formatted_tables/hc_pmed/DY{year}.csv")
+#   pmed_fmt = read.csv(csv_name)
+#   
+#   pmed_out = pmed_fmt %>% 
+#     filter(row_var == "TC1name" | rowLevels %in% keep_rxdrgnams)
+#   
+#   # Write out new file 
+#   write_csv(pmed_out, file = csv_name)
+# }
 
 
 
