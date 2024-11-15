@@ -23,7 +23,7 @@ source("functions.R")
 # source("functions_readMEPS.R")
 
 # Specify location of CCSR crosswalk for COND tables
-# ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
+# Old one for CCS codes: ccs_url  <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccs_conditions.csv"
  ccsr_url <- "https://raw.githubusercontent.com/HHS-AHRQ/MEPS/master/Quick_Reference_Guides/meps_ccsr_conditions.csv"
 
 apps <- c(
@@ -39,8 +39,8 @@ apps <- c(
 #  - rename to 'data_tables - orig'
 
 
-  year_list = 2020:2021  # 5/10/24 - re-running PMED tables with TC1 edit
-  #year_list = 2021
+  #year_list = 2020:2021  # 5/10/24 - re-running PMED tables with TC1 edit
+  year_list = 2022
   hc_year <- max(year_list)
 
   
@@ -87,7 +87,8 @@ apps <- c(
 
   source("functions_format.R")  
   
-  yrs <- 2020:2021
+ # yrs <- 2020:2021
+  yrs <- 2022
   
   format_tables(appKey = "hc_use",  years = yrs)  
   format_tables(appKey = "hc_ins",  years = yrs)
@@ -107,14 +108,14 @@ apps <- c(
   
   format_tables(appKey = "hc_care_access", years = yrs)
   format_tables(appKey = "hc_care_diab",   years = yrs)
-  format_tables(appKey = "hc_care_qual",   years = yrs)
+  format_tables(appKey = "hc_care_qual",   years = yrs) # only for odd years
   
   
   
   
 # Prepare formatted tables for delivery to CVP for Tableau dashboards ---------
   
-  year <- 2020
+  year <- 2022
   
   today  <- Sys.Date()
   newdir <- str_glue("deliveries/DY{year}-{today}")
