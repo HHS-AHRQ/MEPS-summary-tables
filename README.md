@@ -1,3 +1,8 @@
+- This repository has been archived and is no longer maintained.
+- The code is provided for historical reference and may contain unpatched or unknown vulnerabilities.
+- It should not be used in production systems.
+
+
 # MEPS summary tables
 
 This repository contains the code needed to create the tables behind the interactive [**Medical Expenditure Panel Survey (MEPS) Household Component summary tables**](https://meps.ahrq.gov/mepstrends/home/index.html) found on the [MEPS website](https://meps.ahrq.gov/mepsweb/data_stats/quick_tables.jsp). The tables created from the code in this repository provide frequently used summary statistics at the national level for:
